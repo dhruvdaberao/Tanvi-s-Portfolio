@@ -54,7 +54,7 @@ export function QuoteSection() {
           >
             <span className="w-12 h-px bg-primary-foreground/30" />
             <span className="text-primary-foreground/80 text-sm tracking-widest uppercase">
-              {content.hero.name || "Tanvi Sirsat"}
+              {content.hero.name}
             </span>
             <span className="w-12 h-px bg-primary-foreground/30" />
           </motion.div>

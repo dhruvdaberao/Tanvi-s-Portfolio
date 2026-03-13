@@ -4,7 +4,7 @@ import { extractYouTubeId } from "@/utils/video";
 import { verifyAdminToken } from "@/lib/security";
 
 function unauthorized() {
-  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 }
 
 export async function POST(request: NextRequest) {
@@ -14,17 +14,28 @@ export async function POST(request: NextRequest) {
     if (!token || !verifyAdminToken(token)) return unauthorized();
 
     const body = await request.json();
-    const content = body?.content;
-    if (!content) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    const incomingContent = body?.content;
+    if (!incomingContent || typeof incomingContent !== "object") {
+      return NextResponse.json({ success: false, error: "Invalid payload" }, { status: 400 });
+    }
+
+    const content = {
+      ...incomingContent,
+      video: {
+        ...(incomingContent.video || {}),
+      },
+    };
 
     const videoUrl = content.video?.url || "";
     const youtubeId = extractYouTubeId(videoUrl);
-    const autoThumb = youtubeId ? `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg` : content.video?.thumbnail || "";
+    const autoThumb = youtubeId
+      ? `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`
+      : content.video?.thumbnail || "";
 
     content.video.thumbnail = autoThumb;
 
     const db = await getDb();
-    await db.collection("site_content").updateOne(
+    const result = await db.collection("site_content").updateOne(
       { key: "global" },
       {
         $set: {
@@ -45,24 +56,15 @@ export async function POST(request: NextRequest) {
       { upsert: true }
     );
 
-
-    if (Array.isArray(content.gallery)) {
-      await db.collection("gallery_items").deleteMany({});
-      if (content.gallery.length) {
-        await db.collection("gallery_items").insertMany(content.gallery.map((item: any) => ({ ...item, createdAt: new Date() })));
-      }
-    }
-
-    if (Array.isArray(content.writings)) {
-      await db.collection("featured_writings").deleteMany({});
-      if (content.writings.length) {
-        await db.collection("featured_writings").insertMany(content.writings.map((item: any) => ({ ...item, createdAt: new Date() })));
-      }
-    }
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount,
+      upsertedId: result.upsertedId,
+      content,
+    });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Failed to update content" }, { status: 500 });
+    return NextResponse.json({ success: false, error: "Failed to update content" }, { status: 500 });
   }
 }

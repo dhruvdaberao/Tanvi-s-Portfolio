@@ -107,7 +107,7 @@ export function About() {
                  </div>
                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
                     <h3 className="text-white font-serif text-xl sm:text-2xl mb-1 sm:mb-2">{content.video.title || "An Introduction"}</h3>
-                    <p className="text-white/80 text-xs sm:text-sm font-medium uppercase tracking-widest">{content.video.caption || "Meet Tanvi"}</p>
+                    <p className="text-white/80 text-xs sm:text-sm font-medium uppercase tracking-widest">{content.video.caption || `Meet ${content.hero.name}`}</p>
                  </div>
               </motion.div>
             )}
@@ -158,7 +158,7 @@ export function About() {
               {(videoType === "youtube" || videoType === "vimeo") && embedUrl && (
                 <iframe
                   src={embedUrl}
-                  title={content.video.title || "Tanvi introduction video"}
+                  title={content.video.title || `${content.hero.name} introduction video`}
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
