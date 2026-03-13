@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef, useState } from "react"
-import { Quote, Play, X, User } from "lucide-react"
+import { Quote, Play, X, User, Video } from "lucide-react"
 import { useContent } from "@/components/portfolio/content-context"
 
 export function About() {
@@ -37,23 +37,6 @@ export function About() {
                 ) : (
                   <User className="w-24 h-24 text-muted-foreground opacity-20" />
                 )}
-                
-                {hasVideo && (
-                  <motion.button
-                    onClick={() => setVideoOpen(true)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="absolute inset-0 flex items-center justify-center bg-foreground/10 opacity-80 hover:opacity-100 transition-opacity duration-300 group cursor-pointer"
-                  >
-                    <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-2xl relative">
-                      <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="absolute inset-0 bg-primary rounded-full" />
-                      <Play className="w-8 h-8 text-white ml-1 relative z-10" />
-                    </div>
-                    <span className="absolute bottom-10 text-sm font-medium text-white bg-foreground/80 px-6 py-2.5 rounded-full backdrop-blur-md shadow-lg border border-white/10 uppercase tracking-widest">
-                      {content.video.caption || "Meet Tanvi"}
-                    </span>
-                  </motion.button>
-                )}
               </div>
               
               {content.quote.text && (
@@ -86,6 +69,35 @@ export function About() {
             <div className="space-y-6 text-lg leading-relaxed text-muted-foreground whitespace-pre-wrap">
               {content.about.bio}
             </div>
+
+            {hasVideo && (
+              <motion.div 
+                 initial={{ opacity: 0, scale: 0.95 }}
+                 animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                 transition={{ duration: 0.8, delay: 0.4 }}
+                 className="mt-12 relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl group cursor-pointer border border-border bg-muted/20 flex items-center justify-center"
+                 onClick={() => setVideoOpen(true)}
+              >
+                 {content.video.thumbnail ? (
+                    <img src={content.video.thumbnail} loading="lazy" alt="Video Thumbnail" className="absolute w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                 ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center opacity-30">
+                       <Video className="w-16 h-16 mb-4" />
+                       <span className="text-sm font-medium">No Thumbnail Provided</span>
+                    </div>
+                 )}
+                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500 flex items-center justify-center">
+                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="w-20 h-20 rounded-full bg-primary/90 flex items-center justify-center shadow-2xl backdrop-blur-sm relative">
+                       <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="absolute inset-0 bg-primary rounded-full" />
+                       <Play className="w-8 h-8 text-white ml-1 relative z-10" />
+                    </motion.div>
+                 </div>
+                 <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                    <h3 className="text-white font-serif text-2xl mb-2">{content.video.title || "An Introduction"}</h3>
+                    <p className="text-white/80 text-sm font-medium uppercase tracking-widest">{content.video.caption || "Meet Tanvi"}</p>
+                 </div>
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </div>

@@ -22,19 +22,38 @@ export function Contact() {
     email: "",
     inquiryType: "",
     message: "",
+    honeypot: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    console.log(`Sending to ${content.contact.receiverEmail}`, formState)
-    setIsSubmitting(false)
-    setSubmitted(true)
-    setFormState({ name: "", email: "", inquiryType: "", message: "" })
+    setErrorMessage("")
+    
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formState),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Something went wrong. Please try again.')
+      }
+
+      setSubmitted(true)
+      setFormState({ name: "", email: "", inquiryType: "", message: "", honeypot: "" })
+    } catch (error: any) {
+      console.error('Contact submit error:', error)
+      setErrorMessage(error.message || 'Something went wrong. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -164,6 +183,24 @@ export function Contact() {
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {errorMessage && (
+                    <div className="p-4 bg-destructive/10 text-destructive text-sm rounded-lg border border-destructive/20">
+                      {errorMessage}
+                    </div>
+                  )}
+                  {/* Honeypot field for spam prevention */}
+                  <div className="absolute opacity-0 -z-10 bg-transparent">
+                    <label htmlFor="honeypot">Leave this field empty</label>
+                    <input
+                      type="text"
+                      id="honeypot"
+                      name="honeypot"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={formState.honeypot}
+                      onChange={(e) => setFormState({ ...formState, honeypot: e.target.value })}
+                    />
+                  </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium mb-2">Name</label>

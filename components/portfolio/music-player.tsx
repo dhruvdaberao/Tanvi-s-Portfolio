@@ -66,7 +66,7 @@ export function MusicPlayer() {
       
       <button
         onClick={() => setIsPlaying(!isPlaying)}
-        className="group relative flex items-center justify-center w-12 h-12 bg-background/80 backdrop-blur-md border border-border rounded-full shadow-lg hover:border-primary/50 transition-colors"
+        className={`group relative flex items-center justify-center w-12 h-12 bg-background/80 backdrop-blur-md border rounded-full shadow-lg transition-all duration-300 ${isPlaying ? 'border-primary shadow-[0_0_15px_rgba(109,92,255,0.3)]' : 'border-border hover:border-primary/50'}`}
         aria-label={isPlaying ? "Pause music" : "Play music"}
         title={isPlaying ? "Pause music" : "Play music"}
       >

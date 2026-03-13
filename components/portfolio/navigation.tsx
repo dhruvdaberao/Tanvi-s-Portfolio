@@ -75,11 +75,12 @@ export function Navigation() {
         }`}
       >
         <nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="group flex items-center gap-3">
+          <div className="group flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3">
             {/* Profile Icon - Double click for admin access */}
             <div 
               className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all shadow-sm border border-border"
-              onDoubleClick={handleProfileDoubleClick}
+              onDoubleClick={(e) => { e.preventDefault(); handleProfileDoubleClick(); }}
               title="Double click to manage content"
             >
               {content.hero.profilePhoto ? (
@@ -93,13 +94,16 @@ export function Navigation() {
               )}
             </div>
             <motion.span
-              className="font-serif text-xl tracking-tight hidden sm:block"
+              className="font-serif text-xl tracking-tight hidden sm:block select-none"
               whileHover={{ opacity: 0.7 }}
               transition={{ duration: 0.2 }}
+              onDoubleClick={(e) => { e.preventDefault(); handleProfileDoubleClick(); }}
+              title="Double click to manage content"
             >
               {content.hero.name}
             </motion.span>
-          </Link>
+            </Link>
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1">

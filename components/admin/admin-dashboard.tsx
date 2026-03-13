@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useContent, FeaturedWriting, GalleryImage, Award } from "@/components/portfolio/content-context"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
   ArrowLeft, Save, LogOut, Home, User, BookOpen, 
   Image as ImageIcon, Award as AwardIcon, MessageSquare,
   Settings, Eye, EyeOff, CheckCircle, Upload, Trash2,
-  Plus, Music, Mail, Key, Hash, Link as LinkIcon, Video
+  Plus, Music, Mail, Key, Hash, Link as LinkIcon, Video, Users, Download, Camera, GripVertical
 } from "lucide-react"
 
 interface AdminDashboardProps {
@@ -27,6 +27,7 @@ const menuItems = [
   { id: "music", label: "Background Music", icon: Music },
   { id: "settings", label: "Section Visibility", icon: Eye },
   { id: "admin", label: "Admin Access", icon: Key },
+  { id: "newsletter", label: "Newsletter Manager", icon: Users },
 ]
 
 export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
@@ -51,6 +52,38 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
     }
   }
 
+  // Newsletter state
+  const [subscribers, setSubscribers] = useState<{id: string, email: string, created_at: string}[]>([])
+  const [loadingSubscribers, setLoadingSubscribers] = useState(false)
+
+  useEffect(() => {
+    if (activeSection === "newsletter") {
+      setLoadingSubscribers(true)
+      fetch("/api/newsletter/subscribers")
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) setSubscribers(data.subscribers || [])
+        })
+        .finally(() => setLoadingSubscribers(false))
+    }
+  }, [activeSection])
+
+  const exportCSV = () => {
+    const headers = ["Email", "Date Subscribed"]
+    const csvContent = [
+      headers.join(","),
+      ...subscribers.map(sub => `${sub.email},${new Date(sub.created_at).toLocaleDateString()}`)
+    ].join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `newsletter_subscribers_${new Date().toISOString().split('T')[0]}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
   // Handlers for dynamic lists
   const addWriting = () => {
     const newItems = [...content.writings, { id: Date.now().toString(), title: "", image: "", desc: "", category: "", readUrl: "" }]
@@ -62,6 +95,30 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
   }
   const removeWriting = (id: string) => {
     updateContent("writings", null, content.writings.filter(w => w.id !== id))
+  }
+
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    e.dataTransfer.setData("imageId", id)
+  }
+
+  const handleDrop = (e: React.DragEvent, dropId: string) => {
+    e.preventDefault()
+    const dragId = e.dataTransfer.getData("imageId")
+    if (dragId === dropId) return
+
+    const newGallery = [...content.gallery]
+    const dragIndex = newGallery.findIndex(g => g.id === dragId)
+    const dropIndex = newGallery.findIndex(g => g.id === dropId)
+    
+    if (dragIndex > -1 && dropIndex > -1) {
+      const [draggedItem] = newGallery.splice(dragIndex, 1)
+      newGallery.splice(dropIndex, 0, draggedItem)
+      updateContent("gallery", null, newGallery)
+    }
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
   }
 
   const addGallery = () => {
@@ -202,15 +259,15 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (res) => updateContent("hero", "profilePhoto", res))} />
                       {content.hero.profilePhoto ? (
                         <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-background shadow-lg relative">
-                          <img src={content.hero.profilePhoto} alt="Profile" className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><ImageIcon className="w-6 h-6 text-white"/></div>
+                          <img loading="lazy" src={content.hero.profilePhoto} alt="Profile" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Camera className="w-6 h-6 text-white"/></div>
                         </div>
                       ) : (
                         <>
                           <div className="bg-background w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border border-border">
-                            <Upload className="w-6 h-6 text-primary" />
+                            <Camera className="w-6 h-6 text-primary" />
                           </div>
-                          <p className="font-medium text-foreground">Upload Profile Photo</p>
+                          <p className="font-medium text-foreground">Add Profile Photo</p>
                           <p className="text-xs text-muted-foreground mt-1">PNG, JPG recommended</p>
                         </>
                       )}
@@ -283,17 +340,51 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                 </div>
                 <div className="space-y-6">
                   <h3 className="text-lg font-serif border-b border-border pb-2 text-primary flex items-center gap-2"><Video className="w-5 h-5"/> "Meet Tanvi" Video Intro</h3>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Video Caption / Title</label>
-                    <input
-                      type="text"
-                      value={content.video.caption}
-                      onChange={(e) => updateContent("video", "caption", e.target.value)}
-                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50"
-                    />
+                  <p className="text-sm text-muted-foreground mb-4">Upload a video to introduce yourself to readers.</p>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Video Title</label>
+                      <input
+                        type="text"
+                        value={content.video.title}
+                        onChange={(e) => updateContent("video", "title", e.target.value)}
+                        placeholder="An Introduction"
+                        className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Button Label</label>
+                      <input
+                        type="text"
+                        value={content.video.caption}
+                        onChange={(e) => updateContent("video", "caption", e.target.value)}
+                        placeholder="Meet Tanvi"
+                        className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50"
+                      />
+                    </div>
                   </div>
                   <div>
-                     <label className="block text-sm font-medium mb-2">Video Source (YouTube/Vimeo Embed URL or MP4 URL)</label>
+                    <label className="block text-sm font-medium mb-2">Video Thumbnail Cover</label>
+                    <label className="flex flex-col items-center justify-center aspect-[21/9] border-2 border-dashed border-border rounded-xl relative overflow-hidden group hover:border-primary/50 cursor-pointer bg-muted/30">
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (res) => updateContent("video", "thumbnail", res))} />
+                      {content.video.thumbnail ? (
+                        <>
+                          <img src={content.video.thumbnail} loading="lazy" alt="Thumbnail" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Camera className="w-8 h-8 text-white" />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center text-muted-foreground">
+                          <Camera className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <span className="text-sm">Add Thumbnail Image</span>
+                        </div>
+                      )}
+                    </label>
+                    <p className="text-xs text-muted-foreground mt-2">Recommended size: 1920x1080px. Used as the preview image before playing.</p>
+                  </div>
+                  <div className="pt-4 border-t border-border">
+                     <label className="block text-sm font-medium mb-2">Video Source URL (YouTube/Vimeo Embed URL)</label>
                      <input
                         type="text"
                         placeholder="https://www.youtube.com/embed/..."
@@ -346,10 +437,10 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                          <label className="border-2 border-dashed border-border rounded-xl h-32 flex items-center justify-center bg-muted/50 cursor-pointer hover:border-primary/50 overflow-hidden relative group/img">
                             <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, res => updateWriting(writing.id, "image", res))} />
                             {writing.image ? (
-                               <img src={writing.image} alt={writing.title} className="w-full h-full object-cover" />
+                               <img src={writing.image} loading="lazy" alt={writing.title} className="w-full h-full object-cover" />
                             ) : (
                                <div className="text-center text-muted-foreground">
-                                  <ImageIcon className="w-6 h-6 mx-auto mb-2 opacity-50" />
+                                  <Camera className="w-6 h-6 mx-auto mb-2 opacity-50" />
                                   <span className="text-xs">Add Cover</span>
                                </div>
                             )}
@@ -417,19 +508,26 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
-                      className="bg-card rounded-xl border border-border shadow-sm overflow-hidden relative group"
+                      draggable
+                      onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, img.id)}
+                      onDrop={(e) => handleDrop(e as unknown as React.DragEvent, img.id)}
+                      onDragOver={handleDragOver}
+                      className="bg-card rounded-xl border border-border shadow-sm overflow-hidden relative group cursor-grab active:cursor-grabbing"
                     >
+                      <div className="absolute top-2 left-2 z-10 w-8 h-8 bg-black/40 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm cursor-grab">
+                        <GripVertical className="w-4 h-4" />
+                      </div>
                       <button onClick={() => removeGallery(img.id)} className="absolute top-2 right-2 z-10 w-8 h-8 bg-black/60 hover:bg-destructive text-white rounded-full flex items-center justify-center transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                       <label className="block aspect-[4/3] bg-muted relative cursor-pointer group/img">
                         <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, res => updateGallery(img.id, "url", res))} />
                         {img.url ? (
-                           <img src={img.url} alt="Gallery" className="w-full h-full object-cover" />
+                           <img src={img.url} loading="lazy" alt="Gallery" className="w-full h-full object-cover" />
                         ) : (
                            <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
-                              <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
-                              <span className="text-sm font-medium">Upload Image</span>
+                              <Camera className="w-8 h-8 mb-2 opacity-50" />
+                              <span className="text-sm font-medium">Add Image</span>
                            </div>
                         )}
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity flex flex-col justify-center items-center text-white backdrop-blur-sm">
@@ -582,10 +680,12 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                              This music will play softly on the website when visitors enable it. It adds a premium atmosphere to the reading experience. The music is paused by default.
                           </p>
                           <div className="flex items-center gap-4">
-                             <label className={`relative inline-flex items-center cursor-pointer ${content.music.enabled ? 'text-primary' : 'text-muted-foreground'}`}>
+                             <label className="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" className="sr-only peer" checked={content.music.enabled} onChange={(e) => updateContent("music", "enabled", e.target.checked)} />
-                                <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                <span className="ml-3 font-medium text-sm">Enable Music Feature on Website</span>
+                                <div className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${content.music.enabled ? 'bg-primary' : 'bg-muted-foreground/30'}`}>
+                                  <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${content.music.enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                                </div>
+                                <span className={`ml-3 font-medium text-sm ${content.music.enabled ? 'text-primary' : 'text-muted-foreground'}`}>Enable Music Feature on Website</span>
                              </label>
                           </div>
                        </div>
@@ -616,7 +716,9 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                              <label className="inline-flex items-center cursor-pointer">
                                 <span className="mr-3 font-medium text-sm">Loop the Track</span>
                                 <input type="checkbox" className="sr-only peer" checked={content.music.loop} onChange={(e) => updateContent("music", "loop", e.target.checked)} />
-                                <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                <div className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${content.music.loop ? 'bg-primary' : 'bg-muted-foreground/30'}`}>
+                                  <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${content.music.loop ? 'translate-x-[20px]' : 'translate-x-0'}`} />
+                                </div>
                              </label>
                           </div>
                        </div>
@@ -647,7 +749,9 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
                            <input type="checkbox" className="sr-only peer" checked={value} onChange={() => updateContent("visibility", key, !value)} />
-                           <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
+                           <div className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${value ? 'bg-primary' : 'bg-muted-foreground/30'}`}>
+                             <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${value ? 'translate-x-5' : 'translate-x-0'}`} />
+                           </div>
                         </label>
                       </div>
                     ))}
@@ -673,6 +777,52 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                        </p>
                     </div>
                  </div>
+              </div>
+            )}
+
+            {activeSection === "newsletter" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between border-b border-border pb-4">
+                  <div>
+                    <h3 className="text-lg font-serif flex items-center gap-2 text-primary">
+                      <Users className="w-5 h-5"/> Newsletter Manager
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">Manage and export your newsletter subscribers.</p>
+                  </div>
+                  <button 
+                    onClick={exportCSV} 
+                    disabled={subscribers.length === 0}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg font-medium hover:bg-primary hover:text-white transition-all disabled:opacity-50"
+                  >
+                    <Download className="w-4 h-4" /> Export CSV
+                  </button>
+                </div>
+                
+                <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+                  <div className="grid grid-cols-2 p-4 border-b border-border bg-muted/50 font-medium text-sm text-muted-foreground">
+                    <div>Email Address</div>
+                    <div>Date Subscribed</div>
+                  </div>
+                  {loadingSubscribers ? (
+                    <div className="p-12 text-center text-muted-foreground flex justify-center items-center gap-3">
+                      <span className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                      Loading subscribers...
+                    </div>
+                  ) : subscribers.length === 0 ? (
+                    <div className="p-12 text-center text-muted-foreground">
+                      No subscribers found yet.
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-border">
+                      {subscribers.map(sub => (
+                        <div key={sub.id} className="grid grid-cols-2 p-4 text-sm hover:bg-muted/10 transition-colors">
+                          <div className="font-medium">{sub.email}</div>
+                          <div className="text-muted-foreground">{new Date(sub.created_at).toLocaleDateString()}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>

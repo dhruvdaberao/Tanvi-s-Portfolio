@@ -41,6 +41,8 @@ export type ContentState = {
   video: {
     url: string;
     caption: string;
+    thumbnail: string;
+    title: string;
   };
   writings: FeaturedWriting[];
   gallery: GalleryImage[];
@@ -111,6 +113,8 @@ const defaultContent: ContentState = {
   video: {
     url: "",
     caption: "Meet Tanvi",
+    thumbnail: "",
+    title: "An Introduction",
   },
   writings: [],
   gallery: [],

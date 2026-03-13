@@ -2,7 +2,73 @@
 
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { ArrowUp, Twitter, Instagram, BookOpen, Heart } from "lucide-react"
+import { useState } from "react"
+import { ArrowUp, Twitter, Instagram, BookOpen, Heart, Send } from "lucide-react"
+
+function NewsletterForm() {
+  const [email, setEmail] = useState("")
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+  const [message, setMessage] = useState("")
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+    
+    setStatus("loading")
+    setMessage("")
+    
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      })
+      const data = await res.json()
+      
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to subscribe")
+      }
+      
+      setStatus("success")
+      setMessage(data.message || "Thanks for subscribing!")
+      setEmail("")
+    } catch (err: any) {
+      setStatus("error")
+      setMessage(err.message || "Something went wrong")
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="mt-4">
+      <div className="relative">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={status === "loading" || status === "success"}
+          placeholder="your@email.com"
+          className="w-full bg-background border border-border rounded-full py-3 px-5 pr-14 text-sm focus:outline-none focus:border-primary disabled:opacity-50 transition-colors"
+        />
+        <button
+          type="submit"
+          disabled={status === "loading" || status === "success" || !email}
+          className="absolute right-1 top-1 bottom-1 w-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center hover:bg-primary/90 disabled:opacity-50 transition-colors"
+        >
+          {status === "loading" ? (
+             <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+          ) : (
+             <Send className="w-4 h-4 -ml-0.5" />
+          )}
+        </button>
+      </div>
+      {message && (
+        <p className={`mt-3 text-sm font-medium ${status === "success" ? "text-primary" : "text-destructive"}`}>
+          {message}
+        </p>
+      )}
+    </form>
+  )
+}
 
 export function Footer() {
   const scrollToTop = () => {
@@ -69,23 +135,15 @@ export function Footer() {
               </ul>
             </div>
 
-            {/* Resources */}
-            <div className="md:col-span-2">
+            {/* Newsletter */}
+            <div className="md:col-span-4 lg:col-span-4">
               <p className="text-sm tracking-[0.2em] uppercase text-primary mb-6 font-medium">
-                Resources
+                Newsletter
               </p>
-              <ul className="space-y-4">
-                {["Press Kit", "Speaking", "Book Club Guide", "Newsletter"].map((item) => (
-                  <li key={item}>
-                    <a
-                      href="#"
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                Subscribe to receive updates on new writings and upcoming events.
+              </p>
+              <NewsletterForm />
             </div>
 
             {/* Latest Book Promo */}
