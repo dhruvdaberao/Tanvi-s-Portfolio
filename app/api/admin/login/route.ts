@@ -14,51 +14,52 @@ const methodNotAllowed = () =>
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { password } = body;
+    const { password } = await request.json();
 
-    const adminPassword = process.env.ADMIN_PASSWORD;
-    const jwtSecret = process.env.JWT_SECRET;
-    const isProduction = process.env.NODE_ENV === "production";
-
-    if (isProduction) {
-      console.log("Received password length:", typeof password === "string" ? password.length : 0);
-    } else {
-      console.log("Received password:", password);
-    }
-    console.log("Env password exists:", !!adminPassword);
-    console.log("JWT secret exists:", !!jwtSecret);
-
-    if (typeof password !== "string" || !password) {
+    if (typeof password !== "string" || password.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Password required" },
         { status: 400 }
       );
     }
 
-    if (!adminPassword || !jwtSecret) {
-      console.error("Missing required env vars: ADMIN_PASSWORD or JWT_SECRET");
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminPassword) {
+      console.error("ADMIN_PASSWORD is missing from environment variables");
       return NextResponse.json(
-        { success: false, message: "Server error" },
+        { success: false, message: "Server configuration error" },
         { status: 500 }
       );
     }
 
-    if (password !== adminPassword) {
+    if (password.trim() !== adminPassword.trim()) {
       return NextResponse.json(
         { success: false, message: "Invalid credentials" },
         { status: 401 }
       );
     }
 
-    const token = jwt.sign({ role: "admin" }, jwtSecret, { expiresIn: "7d" });
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!jwtSecret) {
+      console.error("JWT_SECRET is missing from environment variables");
+      return NextResponse.json(
+        { success: false, message: "Server configuration error" },
+        { status: 500 }
+      );
+    }
+
+    const token = jwt.sign({ role: "admin" }, jwtSecret, {
+      expiresIn: "7d",
+    });
 
     return NextResponse.json({
       success: true,
       token,
     });
   } catch (error) {
-    console.error("Admin login route error:", error);
+    console.error("Login error:", error);
     return NextResponse.json(
       { success: false, message: "Server error" },
       { status: 500 }
