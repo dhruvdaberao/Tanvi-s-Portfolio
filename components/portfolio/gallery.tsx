@@ -2,7 +2,7 @@
 
 import { motion, useInView, AnimatePresence } from "framer-motion"
 import { useRef, useState } from "react"
-import { X, ChevronLeft, ChevronRight, ImageIcon } from "lucide-react"
+import { X, ChevronLeft, ChevronRight } from "lucide-react"
 import { useContent } from "./content-context"
 
 export function Gallery() {
@@ -12,132 +12,117 @@ export function Gallery() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
 
   const galleryImages = content.gallery
+  if (!galleryImages || galleryImages.length === 0) return null
 
-  if (!galleryImages || galleryImages.length === 0) {
-     return null;
-  }
-
-  const openLightbox = (index: number) => setSelectedImage(index)
-  const closeLightbox = () => setSelectedImage(null)
-  
   const nextImage = () => {
-    if (selectedImage !== null) {
-      setSelectedImage((selectedImage + 1) % galleryImages.length)
-    }
+    if (selectedImage !== null) setSelectedImage((selectedImage + 1) % galleryImages.length)
   }
-  
+
   const prevImage = () => {
-    if (selectedImage !== null) {
-      setSelectedImage((selectedImage - 1 + galleryImages.length) % galleryImages.length)
-    }
+    if (selectedImage !== null) setSelectedImage((selectedImage - 1 + galleryImages.length) % galleryImages.length)
   }
 
   return (
-    <section id="gallery" className="py-32 px-6" ref={ref}>
-      <div className="max-w-7xl mx-auto">
+    <section id="gallery" className="px-4 py-20 sm:px-6 sm:py-24 lg:py-32" ref={ref}>
+      <div className="mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          className="mb-12 text-center sm:mb-16"
         >
-          <p className="text-sm tracking-[0.25em] uppercase text-primary mb-4 font-medium">
-            Moments
-          </p>
-          <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl tracking-tight mb-6">
-            Gallery
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="mb-4 text-sm font-medium uppercase tracking-[0.25em] text-primary">Moments</p>
+          <h2 className="mb-6 font-serif text-4xl tracking-tight sm:text-5xl lg:text-6xl">Gallery</h2>
+          <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
             From book launches to literary festivals, a glimpse into the journey.
           </p>
         </motion.div>
 
-        {/* Masonry Grid */}
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
           {galleryImages.map((image, index) => (
             <motion.div
               key={image.id}
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="break-inside-avoid"
+              transition={{ duration: 0.5, delay: index * 0.05 }}
             >
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-                onClick={() => openLightbox(index)}
-                className="relative group cursor-pointer overflow-hidden rounded-xl bg-muted"
+              <motion.button
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setSelectedImage(index)}
+                className="glass-card group relative w-full overflow-hidden rounded-xl text-left"
               >
-                <div className={`relative ${index % 3 === 0 ? 'aspect-[4/5]' : index % 3 === 1 ? 'aspect-square' : 'aspect-[4/3]'}`}>
+                <div className="relative aspect-[4/5]">
                   <img
                     src={image.url}
                     alt={image.caption || "Gallery image"}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
-                
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-                  <span className="text-xs tracking-wider uppercase text-primary-foreground/80 mb-1">
-                    {image.year}
-                  </span>
-                  <span className="text-white font-medium">{image.caption}</span>
+                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-foreground/85 via-foreground/30 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  <span className="mb-1 text-xs uppercase tracking-wider text-primary-foreground/80">{image.year}</span>
+                  <span className="line-clamp-2 text-sm font-medium text-white sm:text-base">{image.caption}</span>
                 </div>
-              </motion.div>
+              </motion.button>
             </motion.div>
           ))}
         </div>
       </div>
 
-      {/* Lightbox */}
       <AnimatePresence>
         {selectedImage !== null && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-foreground/95 backdrop-blur-md flex items-center justify-center"
-            onClick={closeLightbox}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/95 backdrop-blur-md"
+            onClick={() => setSelectedImage(null)}
           >
             <button
-              onClick={closeLightbox}
-              className="absolute top-6 right-6 z-10 w-12 h-12 rounded-full bg-background/20 flex items-center justify-center text-white hover:bg-background/30 transition-colors"
+              onClick={() => setSelectedImage(null)}
+              className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-background/20 text-white transition-colors hover:bg-background/30 sm:right-6 sm:top-6 sm:h-12 sm:w-12"
             >
-              <X className="w-6 h-6" />
+              <X className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
 
             <button
-              onClick={(e) => { e.stopPropagation(); prevImage(); }}
-              className="absolute left-6 z-10 w-12 h-12 rounded-full bg-background/20 flex items-center justify-center text-white hover:bg-background/30 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation()
+                prevImage()
+              }}
+              className="absolute left-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background/20 text-white transition-colors hover:bg-background/30 sm:left-6 sm:h-12 sm:w-12"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); nextImage(); }}
-              className="absolute right-6 z-10 w-12 h-12 rounded-full bg-background/20 flex items-center justify-center text-white hover:bg-background/30 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation()
+                nextImage()
+              }}
+              className="absolute right-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background/20 text-white transition-colors hover:bg-background/30 sm:right-6 sm:h-12 sm:w-12"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
 
             <motion.div
               key={selectedImage}
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="relative w-full max-w-5xl max-h-[80vh] mx-4"
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="relative mx-4 w-full max-w-5xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="relative aspect-[4/3] flex items-center justify-center">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
                 <img
                   src={galleryImages[selectedImage].url}
                   alt={galleryImages[selectedImage].caption}
-                  className="max-w-full max-h-full object-contain shadow-2xl rounded-lg"
+                  className="h-full w-full object-contain"
                 />
               </div>
-              <div className="text-center mt-4 space-y-1">
-                <p className="text-white font-medium">{galleryImages[selectedImage].caption}</p>
-                <p className="text-white/60 text-sm">{galleryImages[selectedImage].year}</p>
+              <div className="mt-4 space-y-1 text-center">
+                <p className="font-medium text-white">{galleryImages[selectedImage].caption}</p>
+                <p className="text-sm text-white/60">{galleryImages[selectedImage].year}</p>
               </div>
             </motion.div>
           </motion.div>

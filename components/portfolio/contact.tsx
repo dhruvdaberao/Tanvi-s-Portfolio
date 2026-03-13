@@ -57,7 +57,7 @@ export function Contact() {
   }
 
   return (
-    <section id="contact" className="py-32 px-6 relative overflow-hidden" ref={ref}>
+    <section id="contact" className="relative overflow-hidden px-4 py-20 sm:px-6 sm:py-24 lg:py-32" ref={ref}>
       <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/30 -skew-x-12 translate-x-1/4 hidden lg:block" />
       
       <div className="max-w-7xl mx-auto relative">
@@ -78,7 +78,7 @@ export function Contact() {
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-12 gap-12 lg:gap-20">
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16 xl:gap-20">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -86,7 +86,7 @@ export function Contact() {
             className="lg:col-span-5 space-y-6"
           >
             {content.contact.email && (
-               <div className="bg-card rounded-2xl border border-border p-6 hover:shadow-lg transition-shadow duration-300">
+               <div className="glass-card rounded-2xl border p-5 transition-shadow duration-300 hover:shadow-lg sm:p-6">
                  <div className="flex items-start gap-4">
                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                      <Mail className="w-5 h-5 text-primary" />
@@ -107,7 +107,7 @@ export function Contact() {
             )}
 
             {content.contact.location && (
-               <div className="bg-card rounded-2xl border border-border p-6 hover:shadow-lg transition-shadow duration-300">
+               <div className="glass-card rounded-2xl border p-5 transition-shadow duration-300 hover:shadow-lg sm:p-6">
                  <div className="flex items-start gap-4">
                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                      <MapPin className="w-5 h-5 text-primary" />
@@ -122,7 +122,7 @@ export function Contact() {
             )}
 
             {(content.contact.agentName || content.contact.agentOrg) && (
-               <div className="bg-card rounded-2xl border border-border p-6 hover:shadow-lg transition-shadow duration-300">
+               <div className="glass-card rounded-2xl border p-5 transition-shadow duration-300 hover:shadow-lg sm:p-6">
                  <div className="flex items-start gap-4">
                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                      <BookOpen className="w-5 h-5 text-primary" />
@@ -166,7 +166,7 @@ export function Contact() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="lg:col-span-7"
           >
-            <div className="bg-card rounded-2xl border border-border p-8 md:p-10">
+            <div className="glass-card rounded-2xl border p-5 sm:p-7 md:p-10">
               {submitted ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -204,17 +204,17 @@ export function Contact() {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium mb-2">Name</label>
-                      <input type="text" id="name" required value={formState.name} onChange={(e) => setFormState({ ...formState, name: e.target.value })} className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-muted-foreground/50" placeholder="Your name" />
+                      <input type="text" id="name" required value={formState.name} onChange={(e) => setFormState({ ...formState, name: e.target.value })} className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all placeholder:text-muted-foreground/50" placeholder="Your name" />
                     </div>
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
-                      <input type="email" id="email" required value={formState.email} onChange={(e) => setFormState({ ...formState, email: e.target.value })} className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-muted-foreground/50" placeholder="your@email.com" />
+                      <input type="email" id="email" required value={formState.email} onChange={(e) => setFormState({ ...formState, email: e.target.value })} className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all placeholder:text-muted-foreground/50" placeholder="your@email.com" />
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium mb-2">Inquiry Type</label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-4">
                       {inquiryTypes.map((type) => (
                         <button key={type.id} type="button" onClick={() => setFormState({ ...formState, inquiryType: type.id })} className={`px-4 py-2.5 text-sm rounded-lg border transition-all ${formState.inquiryType === type.id ? "bg-primary text-primary-foreground border-primary" : "bg-background border-border hover:border-primary/50"}`}>
                           {type.label}
@@ -225,7 +225,7 @@ export function Contact() {
 
                   <div>
                     <label htmlFor="message" className="block text-sm font-medium mb-2">Message</label>
-                    <textarea id="message" required rows={5} value={formState.message} onChange={(e) => setFormState({ ...formState, message: e.target.value })} className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all resize-none placeholder:text-muted-foreground/50" placeholder="Tell me about your project or inquiry..." />
+                    <textarea id="message" required rows={5} value={formState.message} onChange={(e) => setFormState({ ...formState, message: e.target.value })} className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all resize-none placeholder:text-muted-foreground/50" placeholder="Tell me about your project or inquiry..." />
                   </div>
 
                   <motion.button type="submit" disabled={isSubmitting} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full px-8 py-4 bg-primary text-primary-foreground rounded-lg font-medium text-sm tracking-wide hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">

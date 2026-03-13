@@ -8,7 +8,7 @@ import {
   ArrowLeft, Save, LogOut, Home, User, BookOpen, 
   Image as ImageIcon, Award as AwardIcon, MessageSquare,
   Settings, Eye, EyeOff, CheckCircle, Upload, Trash2,
-  Plus, Music, Mail, Key, Hash, Link as LinkIcon, Video, Users, Download, Camera, GripVertical
+  Plus, Music, Mail, Key, Hash, Link as LinkIcon, Video, Users, Download, Camera, GripVertical, Menu, X
 } from "lucide-react"
 
 interface AdminDashboardProps {
@@ -34,6 +34,7 @@ const menuItems = [
 export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
   const [activeSection, setActiveSection] = useState("hero")
   const [showSaveMessage, setShowSaveMessage] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const { content, updateContent, saveContent } = useContent()
 
   const handleSave = async () => {
@@ -162,26 +163,50 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
   }
 
   return (
-    <div className="flex h-[80vh]">
+    <div className="relative flex h-[80vh] min-h-[540px] overflow-hidden">
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-20 bg-black/40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar overlay"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
-      <div className="w-64 bg-secondary/80 border-r border-border flex flex-col">
-        <div className="p-4 border-b border-border">
+      <aside
+        className={`hide-scrollbar absolute inset-y-0 left-0 z-30 flex w-[85%] max-w-xs flex-col border-r border-border bg-secondary/90 transition-transform duration-300 lg:relative lg:w-64 lg:max-w-none lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="border-b border-border p-4">
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-muted"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="h-4 w-4" />
             </button>
-            <span className="font-medium text-lg text-primary">Edit Dashboard</span>
+            <span className="text-lg font-medium text-primary">Edit Dashboard</span>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-muted lg:hidden"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         </div>
-        
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+
+        <nav className="hide-scrollbar flex-1 space-y-1 overflow-y-auto p-3">
           {menuItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveSection(item.id)}
+              onClick={() => { setActiveSection(item.id); setSidebarOpen(false) }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 activeSection === item.id
                   ? "bg-primary text-primary-foreground font-medium"
@@ -203,18 +228,18 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
             Sign Out
           </button>
         </div>
-      </div>
+      </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col bg-background relative overflow-hidden">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background">
         {/* Header */}
-        <div className="p-4 lg:p-6 border-b border-border flex items-center justify-between sticky top-0 z-10 bg-background/80 backdrop-blur-sm">
-          <h2 className="font-serif text-2xl tracking-tight text-primary">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/80 p-3 backdrop-blur-sm sm:p-4 lg:p-6">
+          <div className="flex items-center gap-2"><button onClick={() => setSidebarOpen(true)} className="flex h-10 w-10 items-center justify-center rounded-lg border border-border hover:bg-muted lg:hidden"><Menu className="h-5 w-5" /></button><h2 className="font-serif text-lg tracking-tight text-primary sm:text-2xl">
             {menuItems.find(m => m.id === activeSection)?.label}
-          </h2>
+          </h2></div>
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md active:scale-95"
+            className="flex shrink-0 items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-md transition-all hover:bg-primary/90 active:scale-95 sm:px-4 sm:py-2.5"
           >
             <Save className="w-4 h-4" />
             Save Changes
@@ -222,7 +247,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-8">
+        <div className="hide-scrollbar flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
           <div className="max-w-3xl mx-auto space-y-8 pb-12">
             
             {activeSection === "hero" && (
@@ -234,7 +259,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                       type="text"
                       value={content.hero.name}
                       onChange={(e) => updateContent("hero", "name", e.target.value)}
-                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
                   <div>
@@ -243,7 +268,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                       type="text"
                       value={content.hero.badge}
                       onChange={(e) => updateContent("hero", "badge", e.target.value)}
-                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
                   <div>
@@ -252,7 +277,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                       type="text"
                       value={content.hero.subtitle}
                       onChange={(e) => updateContent("hero", "subtitle", e.target.value)}
-                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
                   <div>
@@ -261,7 +286,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                       value={content.hero.quote}
                       onChange={(e) => updateContent("hero", "quote", e.target.value)}
                       rows={3}
-                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 resize-y"
+                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 resize-y"
                     />
                   </div>
                   <div>
@@ -305,7 +330,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                           type="text"
                           value={content.navbar[key as keyof typeof content.navbar]}
                           onChange={(e) => updateContent("navbar", key, e.target.value)}
-                          className="w-full px-4 py-2.5 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary/50"
+                          className="w-full px-4 py-2.5 bg-card border border-border rounded-lg focus:ring-2 focus:ring-purple-500"
                         />
                       </div>
                     ))}
@@ -315,14 +340,14 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                   <h3 className="text-lg font-serif mb-4 flex items-center gap-2 text-primary border-b border-border pb-2"><LinkIcon className="w-5 h-5"/> Social Links</h3>
                   <div className="grid gap-4">
                     {["twitter", "instagram", "linkedin", "medium"].map(key => (
-                      <div key={key} className="flex items-center gap-4">
-                        <label className="w-24 text-sm font-medium capitalize">{key}</label>
+                      <div key={key} className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                        <label className="w-20 shrink-0 text-sm font-medium capitalize sm:w-24">{key}</label>
                         <input
                           type="text"
                           placeholder={`https://${key}.com/...`}
                           value={content.social[key as keyof typeof content.social] as string}
                           onChange={(e) => updateContent("social", key, e.target.value)}
-                          className="flex-1 px-4 py-2.5 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary/50"
+                          className="flex-1 px-4 py-2.5 bg-card border border-border rounded-lg focus:ring-2 focus:ring-purple-500"
                         />
                       </div>
                     ))}
@@ -341,7 +366,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                       type="text"
                       value={content.about.title}
                       onChange={(e) => updateContent("about", "title", e.target.value)}
-                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
                   <div>
@@ -350,7 +375,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                       value={content.about.bio}
                       onChange={(e) => updateContent("about", "bio", e.target.value)}
                       rows={6}
-                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50 resize-y"
+                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-purple-500 resize-y"
                     />
                   </div>
                 </div>
@@ -365,7 +390,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                         value={content.video.title}
                         onChange={(e) => updateContent("video", "title", e.target.value)}
                         placeholder="An Introduction"
-                        className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50"
+                        className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
                     <div>
@@ -375,7 +400,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                         value={content.video.caption}
                         onChange={(e) => updateContent("video", "caption", e.target.value)}
                         placeholder="Meet Tanvi"
-                        className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50"
+                        className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
                   </div>
@@ -429,7 +454,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                         placeholder="Paste YouTube, Vimeo, or direct video URL"
                         value={content.video.url}
                         onChange={(e) => updateContent("video", "url", e.target.value)}
-                        className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50"
+                        className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-purple-500"
                      />
                      <div className="flex items-center gap-2 mt-2">
                         {content.video.url ? (
@@ -510,7 +535,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                           placeholder="Title"
                           value={writing.title}
                           onChange={(e) => updateWriting(writing.id, "title", e.target.value)}
-                          className="w-full px-3 py-2 bg-background border border-border rounded-lg font-serif text-lg focus:ring-2 focus:ring-primary/50"
+                          className="w-full px-3 py-2 bg-background border border-border rounded-lg font-serif text-lg focus:ring-2 focus:ring-purple-500"
                         />
                         <div className="grid grid-cols-2 gap-4">
                            <input
@@ -518,14 +543,14 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                               placeholder="Category (e.g., Essay, Memoir)"
                               value={writing.category}
                               onChange={(e) => updateWriting(writing.id, "category", e.target.value)}
-                              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/50"
+                              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-purple-500"
                            />
                            <input
                               type="text"
                               placeholder="Link URL"
                               value={writing.readUrl}
                               onChange={(e) => updateWriting(writing.id, "readUrl", e.target.value)}
-                              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/50"
+                              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-purple-500"
                            />
                         </div>
                         <textarea
@@ -533,7 +558,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                           value={writing.desc}
                           onChange={(e) => updateWriting(writing.id, "desc", e.target.value)}
                           rows={2}
-                          className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm resize-none focus:ring-2 focus:ring-primary/50"
+                          className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm resize-none focus:ring-2 focus:ring-purple-500"
                         />
                       </div>
                     </motion.div>
@@ -593,8 +618,8 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                         </div>
                       </label>
                       <div className="p-4 space-y-3">
-                        <input type="text" placeholder="Caption (optional)" value={img.caption} onChange={e => updateGallery(img.id, "caption", e.target.value)} className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:ring-2 focus:ring-primary/50" />
-                        <input type="text" placeholder="Year" value={img.year} onChange={e => updateGallery(img.id, "year", e.target.value)} className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:ring-2 focus:ring-primary/50" />
+                        <input type="text" placeholder="Caption (optional)" value={img.caption} onChange={e => updateGallery(img.id, "caption", e.target.value)} className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:ring-2 focus:ring-purple-500" />
+                        <input type="text" placeholder="Year" value={img.year} onChange={e => updateGallery(img.id, "year", e.target.value)} className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:ring-2 focus:ring-purple-500" />
                       </div>
                     </motion.div>
                   ))}
@@ -639,21 +664,21 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                           placeholder="Award name (e.g. Booker Prize)"
                           value={award.title}
                           onChange={e => updateAward(award.id, "title", e.target.value)}
-                          className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/50"
+                          className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-purple-500"
                         />
                         <input
                           type="text"
                           placeholder="Year"
                           value={award.year}
                           onChange={e => updateAward(award.id, "year", e.target.value)}
-                          className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/50"
+                          className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-purple-500"
                         />
                         <input
                           type="text"
                           placeholder="Organization"
                           value={award.org}
                           onChange={e => updateAward(award.id, "org", e.target.value)}
-                          className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/50"
+                          className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-purple-500"
                         />
                       </div>
                       <button onClick={() => removeAward(award.id)} className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
@@ -674,7 +699,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                     onChange={(e) => updateContent("quote", "text", e.target.value)}
                     rows={5}
                     placeholder="Enter the standout quote..."
-                    className="w-full px-6 py-5 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50 resize-y font-serif text-2xl text-center leading-relaxed italic"
+                    className="w-full px-6 py-5 bg-card border border-border rounded-xl focus:ring-2 focus:ring-purple-500 resize-y font-serif text-2xl text-center leading-relaxed italic"
                   />
                   <p className="text-sm text-muted-foreground mt-4 text-center">
                     This block quote serves as a powerful standalone statement.
@@ -690,11 +715,11 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium mb-2">Public Email</label>
-                      <input type="email" value={content.contact.email} onChange={e => updateContent("contact", "email", e.target.value)} className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50" />
+                      <input type="email" value={content.contact.email} onChange={e => updateContent("contact", "email", e.target.value)} className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-purple-500" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">Location</label>
-                      <input type="text" value={content.contact.location} onChange={e => updateContent("contact", "location", e.target.value)} className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50" />
+                      <input type="text" value={content.contact.location} onChange={e => updateContent("contact", "location", e.target.value)} className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-purple-500" />
                     </div>
                   </div>
                 </div>
@@ -704,11 +729,11 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium mb-2">Agent Name</label>
-                      <input type="text" value={content.contact.agentName} onChange={e => updateContent("contact", "agentName", e.target.value)} className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50" />
+                      <input type="text" value={content.contact.agentName} onChange={e => updateContent("contact", "agentName", e.target.value)} className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-purple-500" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">Agency / Organization</label>
-                      <input type="text" value={content.contact.agentOrg} onChange={e => updateContent("contact", "agentOrg", e.target.value)} className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50" />
+                      <input type="text" value={content.contact.agentOrg} onChange={e => updateContent("contact", "agentOrg", e.target.value)} className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-purple-500" />
                     </div>
                   </div>
                 </div>
@@ -717,7 +742,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                    <h3 className="text-lg font-serif mb-4 text-primary pb-2 border-b border-border">Form Submission</h3>
                    <div>
                       <label className="block text-sm font-medium mb-2">Receiver Email Address</label>
-                      <input type="email" value={content.contact.receiverEmail} onChange={e => updateContent("contact", "receiverEmail", e.target.value)} placeholder="hello@tanvisirsat.com" className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50" />
+                      <input type="email" value={content.contact.receiverEmail} onChange={e => updateContent("contact", "receiverEmail", e.target.value)} placeholder="hello@tanvisirsat.com" className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-purple-500" />
                       <p className="text-xs text-muted-foreground mt-2">Emails sent via the contact form will be forwarded to this address.</p>
                    </div>
                 </div>
@@ -736,7 +761,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                           <p className="text-sm text-foreground/80 leading-relaxed mb-4">
                              This music will play softly on the website when visitors enable it. It adds a premium atmosphere to the reading experience. The music is paused by default.
                           </p>
-                          <div className="flex items-center gap-4">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
                              <label className="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" className="sr-only peer" checked={content.music.enabled} onChange={(e) => updateContent("music", "enabled", e.target.checked)} />
                                 <div className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${content.music.enabled ? 'bg-primary' : 'bg-muted-foreground/30'}`}>
@@ -827,7 +852,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                           type="text" 
                           value={content.admin.pass} 
                           onChange={e => updateContent("admin", "pass", e.target.value)}
-                          className="w-full px-4 py-3 border border-border bg-background rounded-lg focus:ring-2 focus:ring-primary/50"
+                          className="w-full px-4 py-3 border border-border bg-background rounded-lg focus:ring-2 focus:ring-purple-500"
                        />
                        <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
                           This is the password used to bypass the double-click lock on the main website. Ensure it is strong.

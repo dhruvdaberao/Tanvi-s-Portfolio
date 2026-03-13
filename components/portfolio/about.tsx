@@ -21,11 +21,11 @@ export function About() {
   const [thumbError, setThumbError] = useState(false)
 
   return (
-    <section id="about" className="py-32 px-6 relative overflow-hidden" ref={ref}>
+    <section id="about" className="relative overflow-hidden px-4 py-20 sm:px-6 sm:py-24 lg:py-32" ref={ref}>
       <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/30 -skew-x-12 translate-x-1/4 hidden lg:block pointer-events-none" />
       
       <div className="max-w-7xl mx-auto relative">
-        <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+        <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-16 xl:gap-20">
           
           <motion.div
             initial={{ opacity: 0, x: -40 }}
@@ -50,7 +50,7 @@ export function About() {
                    initial={{ opacity: 0, y: 20 }}
                    animate={isInView ? { opacity: 1, y: 0 } : {}}
                    transition={{ duration: 0.8, delay: 0.5 }}
-                   className="absolute -bottom-6 -right-6 md:-right-12 bg-card p-6 rounded-xl shadow-2xl border border-border max-w-xs z-20"
+                   className="glass-card absolute -bottom-4 left-4 right-4 z-20 rounded-xl p-4 shadow-2xl sm:-bottom-6 sm:left-auto sm:right-0 sm:max-w-xs sm:p-6 md:-right-12"
                  >
                    <Quote className="w-6 h-6 text-primary mb-3" />
                    <p className="text-sm italic text-foreground leading-relaxed font-serif">
@@ -82,7 +82,7 @@ export function About() {
                  initial={{ opacity: 0, scale: 0.95 }}
                  animate={isInView ? { opacity: 1, scale: 1 } : {}}
                  transition={{ duration: 0.8, delay: 0.4 }}
-                 className="mt-12 relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl group cursor-pointer border-2 border-border hover:border-primary/50 hover:shadow-[0_0_30px_rgba(109,92,255,0.15)] bg-muted/20 flex items-center justify-center transition-all duration-500"
+                 className="glass-card mt-10 flex aspect-video w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 shadow-2xl transition-all duration-500 group hover:border-primary/50 hover:shadow-[0_0_30px_rgba(109,92,255,0.15)] sm:mt-12 sm:rounded-3xl"
                  onClick={() => setVideoOpen(true)}
               >
                  {resolvedThumbnail && !thumbError ? (
@@ -135,7 +135,7 @@ export function About() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 sm:p-6 md:p-8"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-3 backdrop-blur-md sm:p-5 md:p-6"
             onClick={() => setVideoOpen(false)}
           >
             <motion.div
@@ -143,7 +143,7 @@ export function About() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+              className="relative aspect-video w-[95vw] max-w-[900px] overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl md:w-[90vw]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close Button */}

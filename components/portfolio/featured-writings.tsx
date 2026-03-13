@@ -30,7 +30,7 @@ export function FeaturedWritings() {
   }
 
   return (
-    <section id="writings" className="py-32 px-6 bg-secondary/50 relative overflow-hidden" ref={ref}>
+    <section id="writings" className="relative overflow-hidden bg-secondary/50 px-4 py-20 sm:px-6 sm:py-24 lg:py-32" ref={ref}>
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
       
       <div className="max-w-7xl mx-auto">
@@ -68,7 +68,7 @@ export function FeaturedWritings() {
                 key={writing.id} 
                 className="flex-[0_0_100%] min-w-0 md:flex-[0_0_calc(50%-1.5rem)] lg:flex-[0_0_calc(33.333%-1.5rem)] relative group"
               >
-                <div className="h-full bg-background border border-border flex flex-col rounded-2xl p-8 hover:border-primary/50 transition-colors shadow-sm relative overflow-hidden">
+                <div className="glass-card relative flex h-full flex-col overflow-hidden rounded-2xl border p-6 shadow-sm transition-colors hover:border-primary/50 sm:p-8">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
 
                   <div className="flex items-start gap-3 mb-6 relative z-10">
