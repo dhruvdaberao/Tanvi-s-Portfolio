@@ -1,63 +1,39 @@
 "use client"
 
 import { motion, useInView } from "framer-motion"
-import { useRef, useState } from "react"
-import { ArrowUpRight, Bookmark, Clock } from "lucide-react"
-
-const writings = [
-  {
-    title: "The Architecture of Memory",
-    publication: "The New Yorker",
-    year: "2024",
-    readTime: "18 min",
-    category: "Essay",
-    excerpt: "How we construct our past to navigate our present—a meditation on the unreliability of memory and the stories we tell ourselves to survive.",
-    href: "#",
-    featured: true,
-  },
-  {
-    title: "Unwritten Letters",
-    publication: "The Atlantic",
-    year: "2024",
-    readTime: "12 min",
-    category: "Personal Essay",
-    excerpt: "An exploration of the words we never send, the conversations we rehearse in silence, and the weight of things left unsaid.",
-    href: "#",
-    featured: false,
-  },
-  {
-    title: "The Art of Disappearing",
-    publication: "Harper's Magazine",
-    year: "2023",
-    readTime: "22 min",
-    category: "Long Form",
-    excerpt: "In an age of constant connection, what does it mean to vanish? A journey through the philosophy and practice of intentional absence.",
-    href: "#",
-    featured: false,
-  },
-  {
-    title: "Borrowed Time",
-    publication: "The Paris Review",
-    year: "2023",
-    readTime: "15 min",
-    category: "Memoir",
-    excerpt: "On the peculiar grief of watching time transform the places we once called home, and the people who inhabited them.",
-    href: "#",
-    featured: false,
-  },
-]
+import { useRef, useCallback } from "react"
+import { ArrowUpRight, ChevronLeft, ChevronRight, BookOpen } from "lucide-react"
+import useEmblaCarousel from 'embla-carousel-react'
+import { useContent } from "@/components/portfolio/content-context"
 
 export function FeaturedWritings() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const { content } = useContent()
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    align: 'start',
+    loop: true,
+    skipSnaps: false,
+    dragFree: true
+  })
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev()
+  }, [emblaApi])
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext()
+  }, [emblaApi])
+
+  if (!content.writings || content.writings.length === 0) {
+    return null; // Won't render if empty per requirement
+  }
 
   return (
-    <section id="writing" className="py-32 px-6 bg-secondary/50 relative overflow-hidden" ref={ref}>
-      {/* Decorative element */}
+    <section id="writings" className="py-32 px-6 bg-secondary/50 relative overflow-hidden" ref={ref}>
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
       
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -72,110 +48,63 @@ export function FeaturedWritings() {
               Selected Writings
             </h2>
           </div>
-          <p className="text-muted-foreground max-w-md leading-relaxed">
-            Essays exploring memory, identity, and the stories we construct to make sense of our lives.
-          </p>
+          
+          <div className="flex items-center gap-4">
+            <button onClick={scrollPrev} className="w-12 h-12 rounded-full border border-border flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-sm"><ChevronLeft className="w-5 h-5" /></button>
+            <button onClick={scrollNext} className="w-12 h-12 rounded-full border border-border flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-sm"><ChevronRight className="w-5 h-5" /></button>
+          </div>
         </motion.div>
 
-        <div className="space-y-0">
-          {writings.map((writing, index) => (
-            <motion.article
-              key={writing.title}
-              initial={{ opacity: 0, y: 40 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: index * 0.1 }}
-              className="group border-t border-border relative"
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              {/* Hover background */}
-              <motion.div
-                initial={false}
-                animate={{ 
-                  opacity: hoveredIndex === index ? 1 : 0,
-                  scale: hoveredIndex === index ? 1 : 0.98
-                }}
-                transition={{ duration: 0.3 }}
-                className="absolute inset-0 bg-accent/50 -mx-6 px-6"
-              />
-              
-              <a href={writing.href} className="block py-10 md:py-12 relative">
-                <div className="grid md:grid-cols-12 gap-6 md:gap-12 items-start">
-                  {/* Number & Category */}
-                  <div className="md:col-span-1 flex md:flex-col items-center md:items-start gap-3">
-                    <span className="font-serif text-2xl text-primary/60">
-                      {String(index + 1).padStart(2, '0')}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="overflow-hidden cursor-grab active:cursor-grabbing -mx-4 px-4" 
+          ref={emblaRef}
+        >
+          <div className="flex gap-6 pb-8">
+            {content.writings.map((writing) => (
+              <div 
+                key={writing.id} 
+                className="flex-[0_0_100%] min-w-0 md:flex-[0_0_calc(50%-1.5rem)] lg:flex-[0_0_calc(33.333%-1.5rem)] relative group"
+              >
+                <div className="h-full bg-background border border-border flex flex-col rounded-2xl p-8 hover:border-primary/50 transition-colors shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
+
+                  <div className="flex items-start gap-3 mb-6 relative z-10">
+                    <span className="text-xs tracking-wider uppercase px-2 py-1 bg-primary/10 text-primary rounded">
+                      {writing.category || "General"}
                     </span>
                   </div>
                   
-                  {/* Title & Publication */}
-                  <div className="md:col-span-5">
-                    <div className="flex items-start gap-3 mb-3">
-                      <span className="text-xs tracking-wider uppercase px-2 py-1 bg-primary/10 text-primary rounded">
-                        {writing.category}
-                      </span>
-                      {writing.featured && (
-                        <span className="text-xs tracking-wider uppercase px-2 py-1 bg-card text-muted-foreground rounded border border-border">
-                          Editor{"'"}s Pick
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="font-serif text-2xl md:text-3xl tracking-tight mb-3 group-hover:text-primary transition-colors duration-300">
-                      {writing.title}
-                    </h3>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">{writing.publication}</span>
-                      <span>·</span>
-                      <span>{writing.year}</span>
-                      <span>·</span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" />
-                        {writing.readTime}
-                      </span>
-                    </div>
-                  </div>
+                  <h3 className="font-serif text-2xl tracking-tight mb-4 group-hover:text-primary transition-colors duration-300 relative z-10">
+                    {writing.title}
+                  </h3>
                   
-                  {/* Excerpt */}
-                  <div className="md:col-span-5">
-                    <p className="text-muted-foreground leading-relaxed">
-                      {writing.excerpt}
-                    </p>
-                  </div>
+                  {writing.image && (
+                     <div className="mb-6 rounded-lg overflow-hidden border border-border relative z-10 aspect-video">
+                        <img src={writing.image} alt={writing.title} className="w-full h-full object-cover" />
+                     </div>
+                  )}
+
+                  <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-8 relative z-10">
+                    {writing.desc}
+                  </p>
                   
-                  {/* Arrow */}
-                  <div className="md:col-span-1 flex justify-end">
-                    <motion.div
-                      initial={false}
-                      animate={{ 
-                        x: hoveredIndex === index ? 4 : 0,
-                        y: hoveredIndex === index ? -4 : 0
-                      }}
-                      transition={{ duration: 0.2 }}
-                      className="w-10 h-10 rounded-full border border-border flex items-center justify-center group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300"
+                  <div className="flex items-center justify-between border-t border-border pt-6 mt-auto relative z-10">
+                    <a
+                      href={writing.readUrl || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-10 h-10 rounded-full border border-border flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-300 ml-auto"
                     >
-                      <ArrowUpRight className="w-4 h-4" />
-                    </motion.div>
+                      <ArrowUpRight className="w-4 h-4 translate-y-[2px] -translate-x-[2px] group-hover:translate-x-0 group-hover:translate-y-0 transition-transform" />
+                    </a>
                   </div>
                 </div>
-              </a>
-            </motion.article>
-          ))}
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="mt-16 flex justify-center"
-        >
-          <a
-            href="#"
-            className="inline-flex items-center gap-3 px-8 py-4 bg-foreground text-background rounded-full text-sm tracking-wide font-medium hover:bg-primary transition-colors duration-300 group"
-          >
-            <Bookmark className="w-4 h-4" />
-            View Complete Archive
-            <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </a>
+              </div>
+            ))}
+          </div>
         </motion.div>
       </div>
     </section>

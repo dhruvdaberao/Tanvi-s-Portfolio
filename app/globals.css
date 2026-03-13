@@ -4,20 +4,20 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.98 0.008 285);
-  --foreground: oklch(0.13 0.02 285);
-  --card: oklch(0.99 0.005 285);
-  --card-foreground: oklch(0.13 0.02 285);
-  --popover: oklch(0.99 0.005 285);
-  --popover-foreground: oklch(0.13 0.02 285);
-  --primary: oklch(0.52 0.2 280);
-  --primary-foreground: oklch(0.98 0.008 285);
+  --background: #faf9ff;
+  --foreground: #0f0f14;
+  --card: #ffffff;
+  --card-foreground: #0f0f14;
+  --popover: #ffffff;
+  --popover-foreground: #0f0f14;
+  --primary: #6d5cff;
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.78 0.12 280);
   --secondary-foreground: oklch(0.13 0.02 285);
   --muted: oklch(0.94 0.015 285);
   --muted-foreground: oklch(0.45 0.03 285);
-  --accent: oklch(0.92 0.04 280);
-  --accent-foreground: oklch(0.13 0.02 285);
+  --accent: #6d5cff;
+  --accent-foreground: #ffffff;
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
   --border: oklch(0.88 0.03 280);
@@ -40,20 +40,20 @@
 }
 
 .dark {
-  --background: oklch(0.12 0.025 280);
-  --foreground: oklch(0.98 0.005 285);
-  --card: oklch(0.15 0.025 280);
-  --card-foreground: oklch(0.98 0.005 285);
-  --popover: oklch(0.15 0.025 280);
-  --popover-foreground: oklch(0.98 0.005 285);
-  --primary: oklch(0.65 0.18 280);
-  --primary-foreground: oklch(0.12 0.025 280);
+  --background: #0f0f14;
+  --foreground: #faf9ff;
+  --card: #181820;
+  --card-foreground: #faf9ff;
+  --popover: #181820;
+  --popover-foreground: #faf9ff;
+  --primary: #8b7dff;
+  --primary-foreground: #0f0f14;
   --secondary: oklch(0.4 0.18 280);
   --secondary-foreground: oklch(0.98 0.005 285);
   --muted: oklch(0.2 0.02 280);
   --muted-foreground: oklch(0.65 0.03 285);
-  --accent: oklch(0.25 0.04 280);
-  --accent-foreground: oklch(0.98 0.005 285);
+  --accent: #8b7dff;
+  --accent-foreground: #0f0f14;
   --destructive: oklch(0.396 0.141 25.723);
   --destructive-foreground: oklch(0.637 0.237 25.331);
   --border: oklch(0.28 0.035 280);

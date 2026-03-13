@@ -1,22 +1,13 @@
 "use client"
 
-import { useState } from "react"
-import { motion } from "framer-motion"
+import { useState, useRef } from "react"
+import { useContent, FeaturedWriting, GalleryImage, Award } from "@/components/portfolio/content-context"
+import { motion, AnimatePresence } from "framer-motion"
 import { 
-  ArrowLeft, 
-  Save, 
-  LogOut, 
-  Home, 
-  User, 
-  BookOpen, 
-  Image as ImageIcon, 
-  Award, 
-  MessageSquare,
-  Settings,
-  Eye,
-  EyeOff,
-  CheckCircle,
-  Upload
+  ArrowLeft, Save, LogOut, Home, User, BookOpen, 
+  Image as ImageIcon, Award as AwardIcon, MessageSquare,
+  Settings, Eye, EyeOff, CheckCircle, Upload, Trash2,
+  Plus, Music, Mail, Key, Hash, Link as LinkIcon, Video
 } from "lucide-react"
 
 interface AdminDashboardProps {
@@ -26,66 +17,81 @@ interface AdminDashboardProps {
 
 const menuItems = [
   { id: "hero", label: "Hero Section", icon: Home },
-  { id: "about", label: "About", icon: User },
+  { id: "navbar", label: "Navigation & Social", icon: Hash },
+  { id: "about", label: "About & Video", icon: User },
   { id: "writings", label: "Featured Writings", icon: BookOpen },
   { id: "gallery", label: "Gallery", icon: ImageIcon },
-  { id: "awards", label: "Awards", icon: Award },
+  { id: "awards", label: "Awards", icon: AwardIcon },
   { id: "quote", label: "Featured Quote", icon: MessageSquare },
-  { id: "settings", label: "Section Visibility", icon: Settings },
+  { id: "contact", label: "Contact Info", icon: Mail },
+  { id: "music", label: "Background Music", icon: Music },
+  { id: "settings", label: "Section Visibility", icon: Eye },
+  { id: "admin", label: "Admin Access", icon: Key },
 ]
 
 export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
   const [activeSection, setActiveSection] = useState("hero")
   const [showSaveMessage, setShowSaveMessage] = useState(false)
-  
-  // Content state
-  const [content, setContent] = useState({
-    hero: {
-      badge: "Award-Winning Author",
-      subtitle: "Writer & Essayist",
-      quote: "Words have the power to change the world.",
-      name: "Tanvi Sirsat",
-    },
-    about: {
-      title: "Crafting stories that resonate",
-      bio: "I am Tanvi Sirsat, a writer exploring the intersections of memory, identity, and the human condition.",
-    },
-    quote: {
-      text: "Every word we write is a bridge between what was and what could be.",
-    },
-    visibility: {
-      hero: true,
-      about: true,
-      writings: true,
-      blog: true,
-      publications: true,
-      awards: true,
-      gallery: true,
-      quote: true,
-      contact: true,
-    },
-  })
+  const { content, updateContent } = useContent()
 
   const handleSave = () => {
-    // In production, save to database
     setShowSaveMessage(true)
     setTimeout(() => setShowSaveMessage(false), 3000)
   }
 
-  const updateContent = (section: string, field: string, value: string | boolean) => {
-    setContent(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section as keyof typeof prev],
-        [field]: value,
-      },
-    }))
+  // Generic File Upload Handler (Simulated with base64)
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (base64: string) => void) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        callback(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  // Handlers for dynamic lists
+  const addWriting = () => {
+    const newItems = [...content.writings, { id: Date.now().toString(), title: "", image: "", desc: "", category: "", readUrl: "" }]
+    updateContent("writings", null, newItems)
+  }
+  const updateWriting = (id: string, field: string, value: string) => {
+    const newItems = content.writings.map(w => w.id === id ? { ...w, [field]: value } : w)
+    updateContent("writings", null, newItems)
+  }
+  const removeWriting = (id: string) => {
+    updateContent("writings", null, content.writings.filter(w => w.id !== id))
+  }
+
+  const addGallery = () => {
+    const newItems = [...content.gallery, { id: Date.now().toString(), url: "", caption: "", year: "" }]
+    updateContent("gallery", null, newItems)
+  }
+  const updateGallery = (id: string, field: string, value: string) => {
+    const newItems = content.gallery.map(g => g.id === id ? { ...g, [field]: value } : g)
+    updateContent("gallery", null, newItems)
+  }
+  const removeGallery = (id: string) => {
+    updateContent("gallery", null, content.gallery.filter(g => g.id !== id))
+  }
+
+  const addAward = () => {
+    const newItems = [...content.awards.list, { id: Date.now().toString(), title: "", year: "", org: "" }]
+    updateContent("awards", "list", newItems)
+  }
+  const updateAward = (id: string, field: string, value: string) => {
+    const newItems = content.awards.list.map(a => a.id === id ? { ...a, [field]: value } : a)
+    updateContent("awards", "list", newItems)
+  }
+  const removeAward = (id: string) => {
+    updateContent("awards", "list", content.awards.list.filter(a => a.id !== id))
   }
 
   return (
     <div className="flex h-[80vh]">
       {/* Sidebar */}
-      <div className="w-64 bg-muted/50 border-r border-border flex flex-col">
+      <div className="w-64 bg-secondary/80 border-r border-border flex flex-col">
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-3">
             <button
@@ -94,7 +100,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
-            <span className="font-medium">Admin Dashboard</span>
+            <span className="font-medium text-lg text-primary">Edit Dashboard</span>
           </div>
         </div>
         
@@ -105,8 +111,8 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
               onClick={() => setActiveSection(item.id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 activeSection === item.id
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                  ? "bg-primary text-primary-foreground font-medium"
+                  : "hover:bg-primary/10 text-muted-foreground hover:text-foreground"
               }`}
             >
               <item.icon className="w-4 h-4" />
@@ -118,24 +124,24 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
         <div className="p-3 border-t border-border">
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
           >
             <LogOut className="w-4 h-4" />
-            Logout
+            Sign Out
           </button>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-background relative overflow-hidden">
         {/* Header */}
-        <div className="p-4 border-b border-border flex items-center justify-between">
-          <h2 className="font-serif text-xl">
+        <div className="p-4 lg:p-6 border-b border-border flex items-center justify-between sticky top-0 z-10 bg-background/80 backdrop-blur-sm">
+          <h2 className="font-serif text-2xl tracking-tight text-primary">
             {menuItems.find(m => m.id === activeSection)?.label}
           </h2>
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-all shadow-md active:scale-95"
           >
             <Save className="w-4 h-4" />
             Save Changes
@@ -143,255 +149,549 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {activeSection === "hero" && (
-            <div className="space-y-6 max-w-2xl">
-              <div>
-                <label className="block text-sm font-medium mb-2">Badge Text</label>
-                <input
-                  type="text"
-                  value={content.hero.badge}
-                  onChange={(e) => updateContent("hero", "badge", e.target.value)}
-                  className="w-full px-4 py-3 bg-muted border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Subtitle</label>
-                <input
-                  type="text"
-                  value={content.hero.subtitle}
-                  onChange={(e) => updateContent("hero", "subtitle", e.target.value)}
-                  className="w-full px-4 py-3 bg-muted border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Hero Quote</label>
-                <textarea
-                  value={content.hero.quote}
-                  onChange={(e) => updateContent("hero", "quote", e.target.value)}
-                  rows={3}
-                  className="w-full px-4 py-3 bg-muted border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Author Name</label>
-                <input
-                  type="text"
-                  value={content.hero.name}
-                  onChange={(e) => updateContent("hero", "name", e.target.value)}
-                  className="w-full px-4 py-3 bg-muted border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Hero Image</label>
-                <div className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                  <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">Click to upload or drag and drop</p>
-                  <p className="text-xs text-muted-foreground mt-1">PNG, JPG up to 10MB</p>
+        <div className="flex-1 overflow-y-auto p-6 md:p-8">
+          <div className="max-w-3xl mx-auto space-y-8 pb-12">
+            
+            {activeSection === "hero" && (
+              <div className="space-y-6">
+                <div className="grid gap-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Author Name</label>
+                    <input
+                      type="text"
+                      value={content.hero.name}
+                      onChange={(e) => updateContent("hero", "name", e.target.value)}
+                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Badge Text</label>
+                    <input
+                      type="text"
+                      value={content.hero.badge}
+                      onChange={(e) => updateContent("hero", "badge", e.target.value)}
+                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Hero Description (Subtitle)</label>
+                    <input
+                      type="text"
+                      value={content.hero.subtitle}
+                      onChange={(e) => updateContent("hero", "subtitle", e.target.value)}
+                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Hero Quote</label>
+                    <textarea
+                      value={content.hero.quote}
+                      onChange={(e) => updateContent("hero", "quote", e.target.value)}
+                      rows={3}
+                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 resize-y"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 flex items-center justify-between">
+                      <span>Profile Photo</span>
+                      {content.hero.profilePhoto && (
+                        <button onClick={() => updateContent("hero", "profilePhoto", "")} className="text-xs text-destructive hover:underline">Remove</button>
+                      )}
+                    </label>
+                    <label className="border-2 border-dashed border-primary/20 bg-primary/5 rounded-xl p-8 text-center hover:bg-primary/10 hover:border-primary/50 transition-all cursor-pointer block group">
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (res) => updateContent("hero", "profilePhoto", res))} />
+                      {content.hero.profilePhoto ? (
+                        <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-background shadow-lg relative">
+                          <img src={content.hero.profilePhoto} alt="Profile" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><ImageIcon className="w-6 h-6 text-white"/></div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="bg-background w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border border-border">
+                            <Upload className="w-6 h-6 text-primary" />
+                          </div>
+                          <p className="font-medium text-foreground">Upload Profile Photo</p>
+                          <p className="text-xs text-muted-foreground mt-1">PNG, JPG recommended</p>
+                        </>
+                      )}
+                    </label>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {activeSection === "about" && (
-            <div className="space-y-6 max-w-2xl">
-              <div>
-                <label className="block text-sm font-medium mb-2">Section Title</label>
-                <input
-                  type="text"
-                  value={content.about.title}
-                  onChange={(e) => updateContent("about", "title", e.target.value)}
-                  className="w-full px-4 py-3 bg-muted border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Biography</label>
-                <textarea
-                  value={content.about.bio}
-                  onChange={(e) => updateContent("about", "bio", e.target.value)}
-                  rows={6}
-                  className="w-full px-4 py-3 bg-muted border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Profile Photo</label>
-                <div className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                  <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">Click to upload profile photo</p>
+            {activeSection === "navbar" && (
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-lg font-serif mb-4 flex items-center gap-2 text-primary border-b border-border pb-2"><Hash className="w-5 h-5"/> Navbar Titles</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {["about", "writings", "blog", "publications", "awards", "gallery", "contact"].map(key => (
+                      <div key={key}>
+                        <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-2">{key}</label>
+                        <input
+                          type="text"
+                          value={content.navbar[key as keyof typeof content.navbar]}
+                          onChange={(e) => updateContent("navbar", key, e.target.value)}
+                          className="w-full px-4 py-2.5 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary/50"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-serif mb-4 flex items-center gap-2 text-primary border-b border-border pb-2"><LinkIcon className="w-5 h-5"/> Social Links</h3>
+                  <div className="grid gap-4">
+                    {["twitter", "instagram", "linkedin", "medium"].map(key => (
+                      <div key={key} className="flex items-center gap-4">
+                        <label className="w-24 text-sm font-medium capitalize">{key}</label>
+                        <input
+                          type="text"
+                          placeholder={`https://${key}.com/...`}
+                          value={content.social[key as keyof typeof content.social] as string}
+                          onChange={(e) => updateContent("social", key, e.target.value)}
+                          className="flex-1 px-4 py-2.5 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary/50"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Video Introduction</label>
-                <div className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                  <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">Upload video or paste YouTube/Vimeo link</p>
-                </div>
-              </div>
-            </div>
-          )}
+            )}
 
-          {activeSection === "writings" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium">Featured Writings</h3>
-                <button className="px-4 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors">
-                  + Add Writing
-                </button>
-              </div>
-              
-              {/* Sample writing cards */}
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-muted/50 rounded-xl p-4 border border-border">
-                  <div className="flex gap-4">
-                    <div className="w-24 h-24 bg-muted rounded-lg flex items-center justify-center">
-                      <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1 space-y-2">
-                      <input
+            {activeSection === "about" && (
+              <div className="space-y-8">
+                <div className="space-y-6">
+                  <h3 className="text-lg font-serif border-b border-border pb-2 text-primary flex items-center gap-2"><User className="w-5 h-5"/> About Section</h3>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Section Title</label>
+                    <input
+                      type="text"
+                      value={content.about.title}
+                      onChange={(e) => updateContent("about", "title", e.target.value)}
+                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Biography</label>
+                    <textarea
+                      value={content.about.bio}
+                      onChange={(e) => updateContent("about", "bio", e.target.value)}
+                      rows={6}
+                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50 resize-y"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  <h3 className="text-lg font-serif border-b border-border pb-2 text-primary flex items-center gap-2"><Video className="w-5 h-5"/> "Meet Tanvi" Video Intro</h3>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Video Caption / Title</label>
+                    <input
+                      type="text"
+                      value={content.video.caption}
+                      onChange={(e) => updateContent("video", "caption", e.target.value)}
+                      className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                     <label className="block text-sm font-medium mb-2">Video Source (YouTube/Vimeo Embed URL or MP4 URL)</label>
+                     <input
                         type="text"
-                        placeholder="Writing title"
-                        defaultValue={`Featured Writing ${i}`}
-                        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Short description"
-                        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Link URL"
-                        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      />
-                    </div>
+                        placeholder="https://www.youtube.com/embed/..."
+                        value={content.video.url}
+                        onChange={(e) => updateContent("video", "url", e.target.value)}
+                        className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50"
+                     />
+                     <p className="text-xs text-muted-foreground mt-2">If empty, the video section will not be displayed.</p>
+                  </div>
+                  <div className="text-center p-6 border border-dashed border-border rounded-xl bg-muted/30">
+                     <p className="text-sm font-medium mb-2">Or Upload MP4 Video</p>
+                     <label className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-foreground rounded-lg cursor-pointer hover:bg-secondary/80 text-sm">
+                        <Video className="w-4 h-4" /> Upload Video
+                        <input type="file" accept="video/mp4" className="hidden" onChange={(e) => handleFileUpload(e, (res) => updateContent("video", "url", res))} />
+                     </label>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {activeSection === "gallery" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium">Gallery Images</h3>
-                <button className="px-4 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors">
-                  + Upload Images
-                </button>
               </div>
-              
-              <div className="grid grid-cols-3 gap-4">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="aspect-square bg-muted rounded-xl flex items-center justify-center relative group cursor-pointer">
-                    <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                    <div className="absolute inset-0 bg-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
-                      <span className="text-white text-sm">Replace</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            )}
 
-          {activeSection === "awards" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium">Awards & Recognition</h3>
-                <button className="px-4 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors">
-                  + Add Award
-                </button>
-              </div>
-              
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-muted/50 rounded-xl p-4 border border-border">
-                  <div className="grid grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      placeholder="Award name"
-                      defaultValue={`Award ${i}`}
-                      className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Year"
-                      defaultValue="2024"
-                      className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Category"
-                      className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Description"
-                      className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {activeSection === "quote" && (
-            <div className="space-y-6 max-w-2xl">
-              <div>
-                <label className="block text-sm font-medium mb-2">Featured Quote</label>
-                <textarea
-                  value={content.quote.text}
-                  onChange={(e) => updateContent("quote", "text", e.target.value)}
-                  rows={4}
-                  className="w-full px-4 py-3 bg-muted border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none font-serif text-lg"
-                />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                This quote will be displayed prominently on the website with elegant typography.
-              </p>
-            </div>
-          )}
-
-          {activeSection === "settings" && (
-            <div className="space-y-6 max-w-2xl">
-              <p className="text-muted-foreground mb-6">
-                Toggle sections on or off to customize what appears on your website.
-              </p>
-              
-              {Object.entries(content.visibility).map(([key, value]) => (
-                <div key={key} className="flex items-center justify-between py-3 border-b border-border">
-                  <div className="flex items-center gap-3">
-                    {value ? (
-                      <Eye className="w-5 h-5 text-primary" />
-                    ) : (
-                      <EyeOff className="w-5 h-5 text-muted-foreground" />
-                    )}
-                    <span className="capitalize">{key} Section</span>
-                  </div>
-                  <button
-                    onClick={() => updateContent("visibility", key, !value)}
-                    className={`relative w-12 h-6 rounded-full transition-colors ${
-                      value ? "bg-primary" : "bg-muted"
-                    }`}
-                  >
-                    <motion.div
-                      animate={{ x: value ? 24 : 2 }}
-                      className="absolute top-1 w-4 h-4 bg-white rounded-full shadow"
-                    />
+            {activeSection === "writings" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <p className="text-muted-foreground">Manage your featured essays and articles.</p>
+                  <button onClick={addWriting} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg font-medium hover:bg-primary hover:text-white transition-all">
+                    <Plus className="w-4 h-4" /> Add Entry
                   </button>
                 </div>
-              ))}
-            </div>
-          )}
+                
+                <AnimatePresence>
+                  {content.writings.length === 0 && (
+                    <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-center p-12 border-2 border-dashed border-border rounded-xl">
+                      <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                      <p className="text-muted-foreground">No featured writings added. Click "Add Entry" to begin.</p>
+                    </motion.div>
+                  )}
+                  {content.writings.map((writing, index) => (
+                    <motion.div 
+                      key={writing.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="bg-card rounded-xl p-6 border border-border shadow-sm flex flex-col md:flex-row gap-6 relative group"
+                    >
+                      <button onClick={() => removeWriting(writing.id)} className="absolute -top-3 -right-3 w-8 h-8 bg-destructive text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                      
+                      <div className="w-full md:w-1/3">
+                         <label className="border-2 border-dashed border-border rounded-xl h-32 flex items-center justify-center bg-muted/50 cursor-pointer hover:border-primary/50 overflow-hidden relative group/img">
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, res => updateWriting(writing.id, "image", res))} />
+                            {writing.image ? (
+                               <img src={writing.image} alt={writing.title} className="w-full h-full object-cover" />
+                            ) : (
+                               <div className="text-center text-muted-foreground">
+                                  <ImageIcon className="w-6 h-6 mx-auto mb-2 opacity-50" />
+                                  <span className="text-xs">Add Cover</span>
+                               </div>
+                            )}
+                         </label>
+                      </div>
+
+                      <div className="flex-1 space-y-4">
+                        <input
+                          type="text"
+                          placeholder="Title"
+                          value={writing.title}
+                          onChange={(e) => updateWriting(writing.id, "title", e.target.value)}
+                          className="w-full px-3 py-2 bg-background border border-border rounded-lg font-serif text-lg focus:ring-2 focus:ring-primary/50"
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                           <input
+                              type="text"
+                              placeholder="Category (e.g., Essay, Memoir)"
+                              value={writing.category}
+                              onChange={(e) => updateWriting(writing.id, "category", e.target.value)}
+                              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/50"
+                           />
+                           <input
+                              type="text"
+                              placeholder="Link URL"
+                              value={writing.readUrl}
+                              onChange={(e) => updateWriting(writing.id, "readUrl", e.target.value)}
+                              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/50"
+                           />
+                        </div>
+                        <textarea
+                          placeholder="Short description..."
+                          value={writing.desc}
+                          onChange={(e) => updateWriting(writing.id, "desc", e.target.value)}
+                          rows={2}
+                          className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm resize-none focus:ring-2 focus:ring-primary/50"
+                        />
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
+
+            {activeSection === "gallery" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <p className="text-muted-foreground">Manage portfolio images.</p>
+                  <button onClick={addGallery} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg font-medium hover:bg-primary hover:text-white transition-all">
+                    <Plus className="w-4 h-4" /> Add Image
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <AnimatePresence>
+                  {content.gallery.length === 0 && (
+                    <motion.div initial={{opacity:0}} animate={{opacity:1}} className="col-span-full text-center p-12 border-2 border-dashed border-border rounded-xl">
+                      <ImageIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                      <p className="text-muted-foreground">No gallery images added.</p>
+                    </motion.div>
+                  )}
+                  {content.gallery.map((img) => (
+                    <motion.div 
+                      key={img.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      className="bg-card rounded-xl border border-border shadow-sm overflow-hidden relative group"
+                    >
+                      <button onClick={() => removeGallery(img.id)} className="absolute top-2 right-2 z-10 w-8 h-8 bg-black/60 hover:bg-destructive text-white rounded-full flex items-center justify-center transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                      <label className="block aspect-[4/3] bg-muted relative cursor-pointer group/img">
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, res => updateGallery(img.id, "url", res))} />
+                        {img.url ? (
+                           <img src={img.url} alt="Gallery" className="w-full h-full object-cover" />
+                        ) : (
+                           <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
+                              <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
+                              <span className="text-sm font-medium">Upload Image</span>
+                           </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity flex flex-col justify-center items-center text-white backdrop-blur-sm">
+                           <Upload className="w-6 h-6 mb-2" />
+                           <span className="text-xs font-medium uppercase tracking-wider">Replace</span>
+                        </div>
+                      </label>
+                      <div className="p-4 space-y-3">
+                        <input type="text" placeholder="Caption (optional)" value={img.caption} onChange={e => updateGallery(img.id, "caption", e.target.value)} className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:ring-2 focus:ring-primary/50" />
+                        <input type="text" placeholder="Year" value={img.year} onChange={e => updateGallery(img.id, "year", e.target.value)} className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:ring-2 focus:ring-primary/50" />
+                      </div>
+                    </motion.div>
+                  ))}
+                  </AnimatePresence>
+                </div>
+              </div>
+            )}
+
+            {activeSection === "awards" && (
+              <div className="space-y-8">
+                <div className="bg-card p-6 rounded-xl border border-border shadow-sm flex items-center justify-between">
+                   <div>
+                      <h4 className="font-medium">Total Awards Count</h4>
+                      <p className="text-sm text-muted-foreground">Used for the floating hero badge "X+ Awards"</p>
+                   </div>
+                   <div className="flex items-center gap-3">
+                      <input 
+                         type="number" 
+                         value={content.awards.countNumber} 
+                         onChange={e => updateContent("awards", "countNumber", parseInt(e.target.value) || 0)}
+                         className="w-24 px-4 py-2 border border-border rounded-lg text-center font-bold text-lg bg-background"
+                      />
+                   </div>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-border pt-8">
+                  <h3 className="font-serif text-lg text-primary">Awards List</h3>
+                  <button onClick={addAward} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg font-medium hover:bg-primary hover:text-white transition-all">
+                    <Plus className="w-4 h-4" /> Add Award
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  {content.awards.list.length === 0 && (
+                     <div className="text-center p-8 border border-dashed border-border rounded-xl text-muted-foreground text-sm">No awards added.</div>
+                  )}
+                  {content.awards.list.map((award) => (
+                    <div key={award.id} className="bg-card rounded-xl p-4 border border-border flex items-center gap-4 relative">
+                      <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input
+                          type="text"
+                          placeholder="Award name (e.g. Booker Prize)"
+                          value={award.title}
+                          onChange={e => updateAward(award.id, "title", e.target.value)}
+                          className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/50"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Year"
+                          value={award.year}
+                          onChange={e => updateAward(award.id, "year", e.target.value)}
+                          className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/50"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Organization"
+                          value={award.org}
+                          onChange={e => updateAward(award.id, "org", e.target.value)}
+                          className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary/50"
+                        />
+                      </div>
+                      <button onClick={() => removeAward(award.id)} className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeSection === "quote" && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-4 flex items-center gap-2 text-primary"><MessageSquare className="w-5 h-5"/> Featured Big Quote</label>
+                  <textarea
+                    value={content.quote.text}
+                    onChange={(e) => updateContent("quote", "text", e.target.value)}
+                    rows={5}
+                    placeholder="Enter the standout quote..."
+                    className="w-full px-6 py-5 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50 resize-y font-serif text-2xl text-center leading-relaxed italic"
+                  />
+                  <p className="text-sm text-muted-foreground mt-4 text-center">
+                    This block quote serves as a powerful standalone statement.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {activeSection === "contact" && (
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-lg font-serif mb-4 text-primary pb-2 border-b border-border">Contact Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Public Email</label>
+                      <input type="email" value={content.contact.email} onChange={e => updateContent("contact", "email", e.target.value)} className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Location</label>
+                      <input type="text" value={content.contact.location} onChange={e => updateContent("contact", "location", e.target.value)} className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50" />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-serif mb-4 text-primary pb-2 border-b border-border">Literary Agent</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Agent Name</label>
+                      <input type="text" value={content.contact.agentName} onChange={e => updateContent("contact", "agentName", e.target.value)} className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Agency / Organization</label>
+                      <input type="text" value={content.contact.agentOrg} onChange={e => updateContent("contact", "agentOrg", e.target.value)} className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50" />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                   <h3 className="text-lg font-serif mb-4 text-primary pb-2 border-b border-border">Form Submission</h3>
+                   <div>
+                      <label className="block text-sm font-medium mb-2">Receiver Email Address</label>
+                      <input type="email" value={content.contact.receiverEmail} onChange={e => updateContent("contact", "receiverEmail", e.target.value)} placeholder="hello@tanvisirsat.com" className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50" />
+                      <p className="text-xs text-muted-foreground mt-2">Emails sent via the contact form will be forwarded to this address.</p>
+                   </div>
+                </div>
+              </div>
+            )}
+
+            {activeSection === "music" && (
+              <div className="space-y-8">
+                 <div className="bg-primary/5 p-6 rounded-xl border border-primary/20">
+                    <div className="flex gap-4 items-start">
+                       <div className="p-3 bg-primary/10 rounded-full text-primary">
+                          <Music className="w-6 h-6" />
+                       </div>
+                       <div>
+                          <h4 className="font-serif text-lg text-primary mb-1">Ambient Website Music</h4>
+                          <p className="text-sm text-foreground/80 leading-relaxed mb-4">
+                             This music will play softly on the website when visitors enable it. It adds a premium atmosphere to the reading experience. The music is paused by default.
+                          </p>
+                          <div className="flex items-center gap-4">
+                             <label className={`relative inline-flex items-center cursor-pointer ${content.music.enabled ? 'text-primary' : 'text-muted-foreground'}`}>
+                                <input type="checkbox" className="sr-only peer" checked={content.music.enabled} onChange={(e) => updateContent("music", "enabled", e.target.checked)} />
+                                <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                <span className="ml-3 font-medium text-sm">Enable Music Feature on Website</span>
+                             </label>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+
+                 {content.music.enabled && (
+                    <motion.div initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} className="space-y-6">
+                       <div>
+                          <label className="block text-sm font-medium mb-3">Upload Audio Track (MP3/WAV)</label>
+                          <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-8 hover:bg-muted/50 transition-colors cursor-pointer">
+                             <input type="file" accept="audio/*" className="hidden" onChange={(e) => handleFileUpload(e, res => updateContent("music", "fileUrl", res))} />
+                             <Music className="w-10 h-10 text-muted-foreground mb-3" />
+                             <span className="text-sm font-medium">Click to select audio file</span>
+                             {content.music.fileUrl && <span className="text-xs text-primary mt-2 font-mono truncate max-w-[200px]">Audio Loaded</span>}
+                          </label>
+                       </div>
+                       
+                       <div className="grid grid-cols-2 gap-6 p-6 bg-card rounded-xl border border-border">
+                          <div>
+                             <label className="block text-sm font-medium mb-4 flex justify-between">
+                                <span>Default Volume</span>
+                                <span className="text-primary">{content.music.volume}%</span>
+                             </label>
+                             <input type="range" min="0" max="100" value={content.music.volume} onChange={(e) => updateContent("music", "volume", parseInt(e.target.value))} className="w-full accent-primary" />
+                          </div>
+                          <div className="flex items-center justify-end">
+                             <label className="inline-flex items-center cursor-pointer">
+                                <span className="mr-3 font-medium text-sm">Loop the Track</span>
+                                <input type="checkbox" className="sr-only peer" checked={content.music.loop} onChange={(e) => updateContent("music", "loop", e.target.checked)} />
+                                <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                             </label>
+                          </div>
+                       </div>
+                    </motion.div>
+                 )}
+              </div>
+            )}
+
+            {activeSection === "settings" && (
+              <div className="space-y-8">
+                <div className="bg-card border border-border p-6 rounded-xl shadow-sm">
+                  <h3 className="font-serif text-lg mb-2 text-primary">Global Visibility Toggles</h3>
+                  <p className="text-muted-foreground text-sm mb-6">
+                    Turn entire website sections ON or OFF instantly. The navigation bar will automatically update.
+                  </p>
+                  
+                  <div className="space-y-1">
+                    {Object.entries(content.visibility).map(([key, value]) => (
+                      <div key={key} className="flex items-center justify-between py-4 border-b border-border/50 last:border-0 hover:bg-muted/30 px-4 -mx-4 rounded-lg transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${value ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                             {value ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                          </div>
+                          <div className="flex flex-col">
+                             <span className="font-medium capitalize">{key} Section</span>
+                             <span className="text-xs text-muted-foreground">Appears {value ? 'publicly' : 'hidden'} on the homepage</span>
+                          </div>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                           <input type="checkbox" className="sr-only peer" checked={value} onChange={() => updateContent("visibility", key, !value)} />
+                           <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeSection === "admin" && (
+              <div className="space-y-6">
+                 <div>
+                    <h3 className="text-lg font-serif mb-4 flex items-center gap-2 text-primary border-b border-border pb-2"><Key className="w-5 h-5"/> Access Credentials</h3>
+                    <div className="max-w-md bg-card p-6 border border-border rounded-xl">
+                       <label className="block text-sm font-medium mb-3">Admin Dashboard Password</label>
+                       <input 
+                          type="text" 
+                          value={content.admin.pass} 
+                          onChange={e => updateContent("admin", "pass", e.target.value)}
+                          className="w-full px-4 py-3 border border-border bg-background rounded-lg focus:ring-2 focus:ring-primary/50"
+                       />
+                       <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                          This is the password used to bypass the double-click lock on the main website. Ensure it is strong.
+                       </p>
+                    </div>
+                 </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Save Message Toast */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: showSaveMessage ? 1 : 0, y: showSaveMessage ? 0 : 50 }}
-        className="fixed bottom-6 right-6 bg-primary text-primary-foreground px-6 py-3 rounded-xl shadow-lg flex items-center gap-3"
-      >
-        <CheckCircle className="w-5 h-5" />
-        <span>Your changes have been saved successfully.</span>
-      </motion.div>
+      <AnimatePresence>
+         {showSaveMessage && (
+            <motion.div
+               initial={{ opacity: 0, scale: 0.9, y: 20 }}
+               animate={{ opacity: 1, scale: 1, y: 0 }}
+               exit={{ opacity: 0, scale: 0.9, y: 20 }}
+               className="fixed bottom-8 right-8 bg-primary text-primary-foreground px-6 py-4 rounded-xl shadow-2xl border border-white/20 flex items-center gap-3 z-50 backdrop-blur-md"
+            >
+               <CheckCircle className="w-5 h-5" />
+               <span className="font-medium">All changes applied successfully to the website!</span>
+            </motion.div>
+         )}
+      </AnimatePresence>
     </div>
   )
 }

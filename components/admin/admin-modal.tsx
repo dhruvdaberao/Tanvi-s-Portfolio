@@ -4,6 +4,7 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Lock, Eye, EyeOff } from "lucide-react"
 import { AdminDashboard } from "./admin-dashboard"
+import { useContent } from "../portfolio/content-context"
 
 interface AdminModalProps {
   open: boolean
@@ -11,13 +12,13 @@ interface AdminModalProps {
 }
 
 export function AdminModal({ open, onOpenChange }: AdminModalProps) {
+  const { content } = useContent()
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [error, setError] = useState("")
 
-  // Simple password check - in production, use proper auth
-  const correctPassword = "tanvi2024"
+  const correctPassword = content?.admin?.pass
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,7 +34,6 @@ export function AdminModal({ open, onOpenChange }: AdminModalProps) {
     onOpenChange(false)
     setPassword("")
     setError("")
-    // Keep authenticated state for session
   }
 
   const handleLogout = () => {
@@ -66,7 +66,6 @@ export function AdminModal({ open, onOpenChange }: AdminModalProps) {
           {isAuthenticated ? (
             <AdminDashboard onClose={handleClose} onLogout={handleLogout} />
           ) : (
-            // Login Form
             <div className="p-8">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -125,10 +124,6 @@ export function AdminModal({ open, onOpenChange }: AdminModalProps) {
                   Access Dashboard
                 </button>
               </form>
-
-              <p className="text-xs text-muted-foreground text-center mt-6">
-                Hint: tanvi2024
-              </p>
             </div>
           )}
         </motion.div>

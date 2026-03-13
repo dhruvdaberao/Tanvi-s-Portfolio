@@ -31,7 +31,7 @@ export function ThemeToggle() {
         transition={{ duration: 0.3, ease: "easeInOut" }}
       >
         {theme === "dark" ? (
-          <Moon className="h-5 w-5" />
+          <Moon className="h-5 w-5 -scale-x-100" />
         ) : (
           <Sun className="h-5 w-5" />
         )}

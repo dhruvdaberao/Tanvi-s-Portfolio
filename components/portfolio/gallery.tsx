@@ -2,52 +2,20 @@
 
 import { motion, useInView, AnimatePresence } from "framer-motion"
 import { useRef, useState } from "react"
-import Image from "next/image"
-import { X, ChevronLeft, ChevronRight } from "lucide-react"
-
-const galleryImages = [
-  {
-    id: 1,
-    src: "/images/gallery-1.jpg",
-    alt: "Speaking at Literary Festival",
-    category: "Events",
-  },
-  {
-    id: 2,
-    src: "/images/gallery-2.jpg",
-    alt: "Book Signing Event",
-    category: "Book Launch",
-  },
-  {
-    id: 3,
-    src: "/images/gallery-3.jpg",
-    alt: "Writing at Home",
-    category: "Behind the Scenes",
-  },
-  {
-    id: 4,
-    src: "/images/gallery-4.jpg",
-    alt: "Panel Discussion",
-    category: "Events",
-  },
-  {
-    id: 5,
-    src: "/images/gallery-5.jpg",
-    alt: "Award Ceremony",
-    category: "Awards",
-  },
-  {
-    id: 6,
-    src: "/images/gallery-6.jpg",
-    alt: "Writing Workshop",
-    category: "Workshops",
-  },
-]
+import { X, ChevronLeft, ChevronRight, ImageIcon } from "lucide-react"
+import { useContent } from "./content-context"
 
 export function Gallery() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const { content } = useContent()
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
+
+  const galleryImages = content.gallery
+
+  if (!galleryImages || galleryImages.length === 0) {
+     return null;
+  }
 
   const openLightbox = (index: number) => setSelectedImage(index)
   const closeLightbox = () => setSelectedImage(null)
@@ -98,23 +66,22 @@ export function Gallery() {
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
                 onClick={() => openLightbox(index)}
-                className="relative group cursor-pointer overflow-hidden rounded-xl"
+                className="relative group cursor-pointer overflow-hidden rounded-xl bg-muted"
               >
                 <div className={`relative ${index % 3 === 0 ? 'aspect-[4/5]' : index % 3 === 1 ? 'aspect-square' : 'aspect-[4/3]'}`}>
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  <img
+                    src={image.url}
+                    alt={image.caption || "Gallery image"}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
                 
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
                   <span className="text-xs tracking-wider uppercase text-primary-foreground/80 mb-1">
-                    {image.category}
+                    {image.year}
                   </span>
-                  <span className="text-white font-medium">{image.alt}</span>
+                  <span className="text-white font-medium">{image.caption}</span>
                 </div>
               </motion.div>
             </motion.div>
@@ -132,7 +99,6 @@ export function Gallery() {
             className="fixed inset-0 z-50 bg-foreground/95 backdrop-blur-md flex items-center justify-center"
             onClick={closeLightbox}
           >
-            {/* Close button */}
             <button
               onClick={closeLightbox}
               className="absolute top-6 right-6 z-10 w-12 h-12 rounded-full bg-background/20 flex items-center justify-center text-white hover:bg-background/30 transition-colors"
@@ -140,7 +106,6 @@ export function Gallery() {
               <X className="w-6 h-6" />
             </button>
 
-            {/* Navigation */}
             <button
               onClick={(e) => { e.stopPropagation(); prevImage(); }}
               className="absolute left-6 z-10 w-12 h-12 rounded-full bg-background/20 flex items-center justify-center text-white hover:bg-background/30 transition-colors"
@@ -154,7 +119,6 @@ export function Gallery() {
               <ChevronRight className="w-6 h-6" />
             </button>
 
-            {/* Image */}
             <motion.div
               key={selectedImage}
               initial={{ scale: 0.9, opacity: 0 }}
@@ -164,17 +128,16 @@ export function Gallery() {
               className="relative w-full max-w-5xl max-h-[80vh] mx-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="relative aspect-[4/3]">
-                <Image
-                  src={galleryImages[selectedImage].src}
-                  alt={galleryImages[selectedImage].alt}
-                  fill
-                  className="object-contain"
+              <div className="relative aspect-[4/3] flex items-center justify-center">
+                <img
+                  src={galleryImages[selectedImage].url}
+                  alt={galleryImages[selectedImage].caption}
+                  className="max-w-full max-h-full object-contain shadow-2xl rounded-lg"
                 />
               </div>
-              <div className="text-center mt-4">
-                <p className="text-white font-medium">{galleryImages[selectedImage].alt}</p>
-                <p className="text-white/60 text-sm">{galleryImages[selectedImage].category}</p>
+              <div className="text-center mt-4 space-y-1">
+                <p className="text-white font-medium">{galleryImages[selectedImage].caption}</p>
+                <p className="text-white/60 text-sm">{galleryImages[selectedImage].year}</p>
               </div>
             </motion.div>
           </motion.div>

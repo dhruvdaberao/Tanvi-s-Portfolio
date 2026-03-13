@@ -2,60 +2,20 @@
 
 import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
-import { Trophy, Medal, Star, Award, Crown, Sparkles } from "lucide-react"
-
-const awards = [
-  {
-    icon: Trophy,
-    title: "National Book Award",
-    year: "2024",
-    category: "Finalist - Nonfiction",
-    description: "For 'The Weight of Unsent Letters'",
-  },
-  {
-    icon: Crown,
-    title: "Pulitzer Prize",
-    year: "2022",
-    category: "Finalist - Feature Writing",
-    description: "For 'Cartography of Loss'",
-  },
-  {
-    icon: Star,
-    title: "PEN/Diamonstein-Spielvogel Award",
-    year: "2024",
-    category: "Winner",
-    description: "For the Art of the Essay",
-  },
-  {
-    icon: Medal,
-    title: "Whiting Award",
-    year: "2019",
-    category: "Winner",
-    description: "Emerging Writers",
-  },
-  {
-    icon: Award,
-    title: "Pushcart Prize",
-    year: "2021",
-    category: "Winner",
-    description: "Best of Small Presses",
-  },
-  {
-    icon: Sparkles,
-    title: "Vogue India Women of the Year",
-    year: "2023",
-    category: "Literature",
-    description: "Breakthrough Voice",
-  },
-]
+import { Award as AwardIcon } from "lucide-react"
+import { useContent } from "@/components/portfolio/content-context"
 
 export function Awards() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const { content } = useContent()
+
+  if (!content.awards || content.awards.list.length === 0) {
+    return null;
+  }
 
   return (
     <section id="awards" className="py-32 px-6 bg-secondary/30 relative overflow-hidden" ref={ref}>
-      {/* Decorative elements */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 0.05 } : {}}
@@ -82,9 +42,9 @@ export function Awards() {
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {awards.map((award, index) => (
+          {content.awards.list.map((award, index) => (
             <motion.div
-              key={award.title}
+              key={award.id}
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -94,19 +54,18 @@ export function Awards() {
               <div className="h-full bg-card rounded-2xl border border-border p-8 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
                 <div className="flex items-start gap-4">
                   <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
-                    <award.icon className="w-7 h-7 text-primary" />
+                    <AwardIcon className="w-7 h-7 text-primary" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-xs font-medium px-2 py-1 bg-primary/10 text-primary rounded-full">
                         {award.year}
                       </span>
-                      <span className="text-xs text-muted-foreground">{award.category}</span>
+                      <span className="text-xs text-muted-foreground">{award.org}</span>
                     </div>
                     <h3 className="font-serif text-xl mb-2 group-hover:text-primary transition-colors">
                       {award.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground">{award.description}</p>
                   </div>
                 </div>
               </div>
