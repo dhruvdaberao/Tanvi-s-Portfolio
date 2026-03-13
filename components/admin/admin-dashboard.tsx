@@ -34,23 +34,38 @@ const menuItems = [
 export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
   const [activeSection, setActiveSection] = useState("hero")
   const [showSaveMessage, setShowSaveMessage] = useState(false)
-  const { content, updateContent } = useContent()
+  const { content, updateContent, saveContent } = useContent()
 
-  const handleSave = () => {
-    setShowSaveMessage(true)
-    setTimeout(() => setShowSaveMessage(false), 3000)
+  const handleSave = async () => {
+    try {
+      await saveContent()
+      setShowSaveMessage(true)
+      setTimeout(() => setShowSaveMessage(false), 3000)
+    } catch {
+      alert("Failed to save changes")
+    }
   }
 
-  // Generic File Upload Handler (Simulated with base64)
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (base64: string) => void) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void, folder = "portfolio") => {
     const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        callback(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+    if (!file) return
+
+    const token = localStorage.getItem("admin-token") || ""
+    const formData = new FormData()
+    formData.append("file", file)
+    formData.append("folder", folder)
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      alert(data.error || "Upload failed")
+      return
     }
+    callback(data.secure_url)
   }
 
   // Newsletter state
@@ -60,7 +75,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
   useEffect(() => {
     if (activeSection === "newsletter") {
       setLoadingSubscribers(true)
-      fetch("/api/newsletter/subscribers")
+      fetch("/api/newsletter/subscribers", { headers: { Authorization: `Bearer ${localStorage.getItem("admin-token") || ""}` } })
         .then(res => res.json())
         .then(data => {
           if (data.success) setSubscribers(data.subscribers || [])

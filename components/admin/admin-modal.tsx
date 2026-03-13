@@ -4,7 +4,6 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Lock, Eye, EyeOff } from "lucide-react"
 import { AdminDashboard } from "./admin-dashboard"
-import { useContent } from "../portfolio/content-context"
 
 interface AdminModalProps {
   open: boolean
@@ -12,21 +11,30 @@ interface AdminModalProps {
 }
 
 export function AdminModal({ open, onOpenChange }: AdminModalProps) {
-  const { content } = useContent()
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [error, setError] = useState("")
 
-  const correctPassword = content?.admin?.pass
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (password === correctPassword) {
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || "Incorrect password. Please try again.")
+        return
+      }
+
+      localStorage.setItem("admin-token", data.token)
       setIsAuthenticated(true)
       setError("")
-    } else {
-      setError("Incorrect password. Please try again.")
+    } catch {
+      setError("Login failed. Please try again.")
     }
   }
 
@@ -37,6 +45,7 @@ export function AdminModal({ open, onOpenChange }: AdminModalProps) {
   }
 
   const handleLogout = () => {
+    localStorage.removeItem("admin-token")
     setIsAuthenticated(false)
     setPassword("")
     setError("")
