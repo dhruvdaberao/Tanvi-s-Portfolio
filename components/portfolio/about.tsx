@@ -1,10 +1,11 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef, useState } from "react"
-import { Quote, Play, X, User, Video } from "lucide-react"
+import { Quote, Play, X, User, Video as VideoIcon, AlertTriangle } from "lucide-react"
 import { useContent } from "@/components/portfolio/content-context"
+import { getVideoType, getEmbedUrl, isValidVideoUrl, getAutoThumbnail } from "@/utils/video"
 
 export function About() {
   const ref = useRef(null)
@@ -12,7 +13,12 @@ export function About() {
   const [videoOpen, setVideoOpen] = useState(false)
   const { content } = useContent()
 
-  const hasVideo = !!content.video.url;
+  const hasVideo = !!content.video.url
+  const videoType = getVideoType(content.video.url)
+  const embedUrl = getEmbedUrl(content.video.url)
+  const isValid = isValidVideoUrl(content.video.url)
+  const resolvedThumbnail = getAutoThumbnail(content.video.url, content.video.thumbnail)
+  const [thumbError, setThumbError] = useState(false)
 
   return (
     <section id="about" className="py-32 px-6 relative overflow-hidden" ref={ref}>
@@ -70,20 +76,27 @@ export function About() {
               {content.about.bio}
             </div>
 
-            {hasVideo && (
+            {/* Video Thumbnail Card */}
+            {hasVideo && isValid && (
               <motion.div 
                  initial={{ opacity: 0, scale: 0.95 }}
                  animate={isInView ? { opacity: 1, scale: 1 } : {}}
                  transition={{ duration: 0.8, delay: 0.4 }}
-                 className="mt-12 relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl group cursor-pointer border border-border bg-muted/20 flex items-center justify-center"
+                 className="mt-12 relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl group cursor-pointer border-2 border-border hover:border-primary/50 hover:shadow-[0_0_30px_rgba(109,92,255,0.15)] bg-muted/20 flex items-center justify-center transition-all duration-500"
                  onClick={() => setVideoOpen(true)}
               >
-                 {content.video.thumbnail ? (
-                    <img src={content.video.thumbnail} loading="lazy" alt="Video Thumbnail" className="absolute w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                 {resolvedThumbnail && !thumbError ? (
+                    <img
+                      src={resolvedThumbnail}
+                      loading="lazy"
+                      alt="Video Thumbnail"
+                      className="absolute w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      onError={() => setThumbError(true)}
+                    />
                  ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center opacity-30">
-                       <Video className="w-16 h-16 mb-4" />
-                       <span className="text-sm font-medium">No Thumbnail Provided</span>
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-muted/30 to-primary/5 flex flex-col items-center justify-center">
+                       <VideoIcon className="w-16 h-16 mb-4 text-muted-foreground/40" />
+                       <span className="text-sm font-medium text-muted-foreground/60">Video Preview</span>
                     </div>
                  )}
                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500 flex items-center justify-center">
@@ -92,57 +105,81 @@ export function About() {
                        <Play className="w-8 h-8 text-white ml-1 relative z-10" />
                     </motion.div>
                  </div>
-                 <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-                    <h3 className="text-white font-serif text-2xl mb-2">{content.video.title || "An Introduction"}</h3>
-                    <p className="text-white/80 text-sm font-medium uppercase tracking-widest">{content.video.caption || "Meet Tanvi"}</p>
+                 <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                    <h3 className="text-white font-serif text-xl sm:text-2xl mb-1 sm:mb-2">{content.video.title || "An Introduction"}</h3>
+                    <p className="text-white/80 text-xs sm:text-sm font-medium uppercase tracking-widest">{content.video.caption || "Meet Tanvi"}</p>
                  </div>
+              </motion.div>
+            )}
+
+            {/* Invalid URL Warning */}
+            {hasVideo && !isValid && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-12 flex items-center gap-3 p-4 rounded-xl border border-destructive/30 bg-destructive/5 text-destructive"
+              >
+                <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                <p className="text-sm">Invalid video link. Please enter a valid YouTube or Vimeo URL.</p>
               </motion.div>
             )}
           </motion.div>
         </div>
       </div>
 
-      {videoOpen && hasVideo && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/90 backdrop-blur-md p-4"
-          onClick={() => setVideoOpen(false)}
-        >
+      {/* Video Modal */}
+      <AnimatePresence>
+        {videoOpen && hasVideo && isValid && (
           <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10"
-            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 sm:p-6 md:p-8"
+            onClick={() => setVideoOpen(false)}
           >
-            <button
-              onClick={() => setVideoOpen(false)}
-              className="absolute top-4 right-4 z-20 w-12 h-12 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all"
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+              onClick={(e) => e.stopPropagation()}
             >
-              <X className="w-6 h-6" />
-            </button>
-            
-            {content.video.url.includes("youtube.com") || content.video.url.includes("vimeo.com") ? (
-               <iframe
-                 src={content.video.url}
-                 title="Author Video"
-                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                 allowFullScreen
-                 className="absolute inset-0 w-full h-full bg-black border-none"
-               />
-            ) : (
-               <video 
+              {/* Close Button */}
+              <button
+                onClick={() => setVideoOpen(false)}
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all backdrop-blur-sm"
+              >
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
+              </button>
+              
+              {/* YouTube / Vimeo → iframe */}
+              {(videoType === "youtube" || videoType === "vimeo") && embedUrl && (
+                <iframe
+                  src={embedUrl}
+                  title={content.video.title || "Tanvi introduction video"}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full bg-black border-none"
+                />
+              )}
+
+              {/* MP4 / local file → HTML5 video */}
+              {videoType === "mp4" && (
+                <video 
                   src={content.video.url}
                   controls 
-                  autoPlay 
-                  className="absolute inset-0 w-full h-full object-contain"
-               />
-            )}
+                  autoPlay
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-contain rounded-2xl"
+                />
+              )}
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
     </section>
   )
 }

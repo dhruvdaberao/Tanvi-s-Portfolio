@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useContent, FeaturedWriting, GalleryImage, Award } from "@/components/portfolio/content-context"
+import { getVideoType, isValidVideoUrl, getAutoThumbnail } from "@/utils/video"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
   ArrowLeft, Save, LogOut, Home, User, BookOpen, 
@@ -364,35 +365,76 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Video Thumbnail Cover</label>
-                    <label className="flex flex-col items-center justify-center aspect-[21/9] border-2 border-dashed border-border rounded-xl relative overflow-hidden group hover:border-primary/50 cursor-pointer bg-muted/30">
-                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (res) => updateContent("video", "thumbnail", res))} />
-                      {content.video.thumbnail ? (
-                        <>
-                          <img src={content.video.thumbnail} loading="lazy" alt="Thumbnail" className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Camera className="w-8 h-8 text-white" />
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-center text-muted-foreground">
-                          <Camera className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          <span className="text-sm">Add Thumbnail Image</span>
-                        </div>
+                    <label className="block text-sm font-medium mb-2 flex items-center justify-between">
+                      <span>Video Thumbnail Cover</span>
+                      {content.video.thumbnail && (
+                        <button onClick={() => updateContent("video", "thumbnail", "")} className="text-xs text-destructive hover:underline">Remove Custom</button>
                       )}
                     </label>
-                    <p className="text-xs text-muted-foreground mt-2">Recommended size: 1920x1080px. Used as the preview image before playing.</p>
+                    {(() => {
+                      const autoThumb = getAutoThumbnail(content.video.url, content.video.thumbnail)
+                      const isAuto = !content.video.thumbnail && !!autoThumb
+                      return (
+                        <>
+                          <label className="flex flex-col items-center justify-center aspect-[21/9] border-2 border-dashed border-border rounded-xl relative overflow-hidden group hover:border-primary/50 cursor-pointer bg-muted/30">
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (res) => updateContent("video", "thumbnail", res))} />
+                            {autoThumb ? (
+                              <>
+                                <img src={autoThumb} loading="lazy" alt="Thumbnail" className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Camera className="w-8 h-8 text-white" />
+                                </div>
+                                {isAuto && (
+                                  <div className="absolute top-2 left-2 z-10 px-2.5 py-1 bg-black/60 text-white text-[10px] font-semibold uppercase tracking-wider rounded-full backdrop-blur-sm">
+                                    Auto-generated from YouTube
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div className="text-center text-muted-foreground">
+                                <Camera className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                <span className="text-sm">Add Thumbnail Image</span>
+                              </div>
+                            )}
+                          </label>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            {isAuto
+                              ? "Thumbnail auto-generated from YouTube. Upload a custom image to override."
+                              : "Recommended size: 1920×1080px. YouTube videos will auto-generate a thumbnail."
+                            }
+                          </p>
+                        </>
+                      )
+                    })()}
                   </div>
                   <div className="pt-4 border-t border-border">
-                     <label className="block text-sm font-medium mb-2">Video Source URL (YouTube/Vimeo Embed URL)</label>
+                     <label className="block text-sm font-medium mb-2">Video Source URL</label>
                      <input
                         type="text"
-                        placeholder="https://www.youtube.com/embed/..."
+                        placeholder="Paste YouTube, Vimeo, or direct video URL"
                         value={content.video.url}
                         onChange={(e) => updateContent("video", "url", e.target.value)}
                         className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary/50"
                      />
-                     <p className="text-xs text-muted-foreground mt-2">If empty, the video section will not be displayed.</p>
+                     <div className="flex items-center gap-2 mt-2">
+                        {content.video.url ? (
+                           isValidVideoUrl(content.video.url) ? (
+                              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-green-600 dark:text-green-400">
+                                 <span className="w-2 h-2 rounded-full bg-green-500" />
+                                 {getVideoType(content.video.url) === "youtube" && "YouTube video detected"}
+                                 {getVideoType(content.video.url) === "vimeo" && "Vimeo video detected"}
+                                 {getVideoType(content.video.url) === "mp4" && "Local video file detected"}
+                              </span>
+                           ) : (
+                              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-destructive">
+                                 <span className="w-2 h-2 rounded-full bg-destructive" />
+                                 Invalid video link. Please enter a valid YouTube or Vimeo URL.
+                              </span>
+                           )
+                        ) : (
+                           <span className="text-xs text-muted-foreground">Supports: YouTube, Vimeo, or MP4 upload. If empty, the video section will not be displayed.</span>
+                        )}
+                     </div>
                   </div>
                   <div className="text-center p-6 border border-dashed border-border rounded-xl bg-muted/30">
                      <p className="text-sm font-medium mb-2">Or Upload MP4 Video</p>
