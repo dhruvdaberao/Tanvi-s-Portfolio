@@ -276,8 +276,13 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
     updateContent("awards", "list", content.awards.list.filter(a => a.id !== id))
   }
 
+  const handleBackToSite = () => {
+    onClose()
+    window.location.href = "/"
+  }
+
   return (
-    <div className="relative flex h-[80vh] min-h-[540px] overflow-hidden">
+    <div className="relative flex min-h-screen bg-background lg:pl-[260px]">
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -294,19 +299,19 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
 
       {/* Sidebar */}
       <aside
-        className={`hide-scrollbar absolute inset-y-0 left-0 z-30 flex w-[85%] max-w-xs flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-transform duration-300 lg:relative lg:w-64 lg:max-w-none lg:translate-x-0 ${
+        className={`hide-scrollbar fixed inset-y-0 left-0 z-30 flex w-[85%] max-w-xs flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-transform duration-300 lg:w-[260px] lg:max-w-none lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="border-b border-sidebar-border p-4">
+        <div className="sticky top-0 border-b border-sidebar-border bg-sidebar p-4">
           <div className="flex items-center gap-3">
             <button
-              onClick={onClose}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-black/35 p-2 text-white shadow-sm backdrop-blur-md transition-colors hover:bg-black/45"
+              onClick={handleBackToSite}
+              className="inline-flex items-center rounded-lg px-2 py-1.5 text-sm font-medium text-white/90 transition-colors hover:bg-white/15 hover:text-white"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="mr-1.5 h-4 w-4" />
+              Back to Site
             </button>
-            <span className="text-lg font-medium text-white">Edit Dashboard</span>
             <button
               onClick={() => setSidebarOpen(false)}
               className="ml-auto flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-white/15 lg:hidden"
@@ -314,6 +319,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
               <X className="h-4 w-4" />
             </button>
           </div>
+          <span className="mt-3 block text-lg font-medium text-white">Edit Dashboard</span>
         </div>
 
         <nav className="hide-scrollbar flex-1 space-y-1 overflow-y-auto p-3">
@@ -345,24 +351,34 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
       </aside>
 
       {/* Main Content */}
-      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background">
+      <div className="relative flex min-w-0 flex-1 flex-col bg-background">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background p-3 sm:p-4 lg:p-6">
-          <div className="flex items-center gap-2"><button onClick={() => setSidebarOpen(true)} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-black/35 p-2 text-white shadow-sm backdrop-blur-md transition-colors hover:bg-black/45 lg:hidden"><Menu className="h-5 w-5" /></button><h2 className="font-serif text-lg tracking-tight text-primary sm:text-2xl">
-            {menuItems.find(m => m.id === activeSection)?.label}
-          </h2></div>
-          <button
-            onClick={handleSave}
-            className="flex shrink-0 items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-md transition-all hover:bg-primary/90 active:scale-95 sm:px-4 sm:py-2.5"
-          >
-            <Save className="w-4 h-4" />
-            Save Changes
-          </button>
+        <div className="sticky top-0 z-10 border-b border-border bg-background px-4 py-4 sm:px-6 lg:px-10 lg:py-8">
+          <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-black/35 p-2 text-white shadow-sm backdrop-blur-md transition-colors hover:bg-black/45 lg:hidden"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+              <h2 className="font-serif text-lg tracking-tight text-primary sm:text-2xl">
+                {menuItems.find((m) => m.id === activeSection)?.label}
+              </h2>
+            </div>
+            <button
+              onClick={handleSave}
+              className="flex shrink-0 items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-md transition-all hover:bg-primary/90 active:scale-95 sm:px-4 sm:py-2.5"
+            >
+              <Save className="w-4 h-4" />
+              Save Changes
+            </button>
+          </div>
         </div>
 
         {/* Content Area */}
-        <div className="hide-scrollbar flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
-          <div className="max-w-3xl mx-auto space-y-8 pb-12">
+        <div className="hide-scrollbar flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+          <div className="mx-auto max-w-5xl space-y-8 pb-12">
             
             {activeSection === "hero" && (
               <div className="space-y-6">
