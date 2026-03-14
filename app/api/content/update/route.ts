@@ -38,6 +38,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Invalid JSON payload" }, { status: 400 });
     }
 
+    console.log("Received update request");
+
     const incomingContent =
       typeof body === "object" && body !== null && "content" in body
         ? (body as { content?: unknown }).content
@@ -64,17 +66,7 @@ export async function POST(request: NextRequest) {
     const resolvedThumbnail = content.video?.thumbnail || autoThumb;
     content.video.thumbnail = resolvedThumbnail;
 
-    let db;
-    try {
-      db = await getDb();
-    } catch (error) {
-      console.error("DB connection failed:", error);
-      return NextResponse.json(
-        { success: false, error: "Database connection failed" },
-        { status: 500 }
-      );
-    }
-
+    const db = await getDb();
     await db.collection("site_content").updateOne(
       { key: "global" },
       {
@@ -99,9 +91,12 @@ export async function POST(request: NextRequest) {
       { upsert: true }
     );
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      content,
+    });
   } catch (error) {
-    console.error("CONTENT SAVE FAILED:", error);
+    console.error("Content update failed:", error);
     return NextResponse.json(
       {
         success: false,
