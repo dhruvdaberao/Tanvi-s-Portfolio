@@ -50,7 +50,8 @@ export function Contact() {
       setFormState({ name: "", email: "", inquiryType: "general", message: "", honeypot: "" })
     } catch (error: any) {
       console.error('Contact submit error:', error)
-      setErrorMessage(error.message || 'Something went wrong. Please try again.')
+      const message = error?.message === "Failed to send email" ? "Unable to submit message right now. Please try again." : (error?.message || "Unable to submit message right now. Please try again.")
+      setErrorMessage(message)
     } finally {
       setIsSubmitting(false)
     }
@@ -176,9 +177,9 @@ export function Contact() {
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
                     <CheckCircle className="w-8 h-8 text-primary" />
                   </div>
-                  <h3 className="font-serif text-2xl mb-3">Message Sent</h3>
+                  <h3 className="font-serif text-2xl mb-3">Message sent successfully.</h3>
                   <p className="text-muted-foreground max-w-sm mx-auto">
-                    Thank you for reaching out. I{"'"}ll get back to you within a few days.
+                    Thanks for reaching out — your message has been saved and I’ll reply soon.
                   </p>
                 </motion.div>
               ) : (
@@ -204,11 +205,11 @@ export function Contact() {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium mb-2">Name</label>
-                      <input type="text" id="name" required value={formState.name} onChange={(e) => setFormState({ ...formState, name: e.target.value })} className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all placeholder:text-muted-foreground/50" placeholder="Your name" />
+                      <input type="text" id="name" required value={formState.name} onChange={(e) => setFormState({ ...formState, name: e.target.value })} className="w-full px-4 py-3 bg-card border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all placeholder:text-muted-foreground/50" placeholder="Your name" />
                     </div>
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
-                      <input type="email" id="email" required value={formState.email} onChange={(e) => setFormState({ ...formState, email: e.target.value })} className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all placeholder:text-muted-foreground/50" placeholder="your@email.com" />
+                      <input type="email" id="email" required value={formState.email} onChange={(e) => setFormState({ ...formState, email: e.target.value })} className="w-full px-4 py-3 bg-card border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all placeholder:text-muted-foreground/50" placeholder="your@email.com" />
                     </div>
                   </div>
 
@@ -225,7 +226,7 @@ export function Contact() {
 
                   <div>
                     <label htmlFor="message" className="block text-sm font-medium mb-2">Message</label>
-                    <textarea id="message" required rows={5} value={formState.message} onChange={(e) => setFormState({ ...formState, message: e.target.value })} className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all resize-none placeholder:text-muted-foreground/50" placeholder="Tell me about your project or inquiry..." />
+                    <textarea id="message" required rows={5} value={formState.message} onChange={(e) => setFormState({ ...formState, message: e.target.value })} className="w-full px-4 py-3 bg-card border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all resize-none placeholder:text-muted-foreground/50" placeholder="Tell me about your project or inquiry..." />
                   </div>
 
                   <motion.button type="submit" disabled={isSubmitting} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full px-8 py-4 bg-primary text-primary-foreground rounded-lg font-medium text-sm tracking-wide hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
