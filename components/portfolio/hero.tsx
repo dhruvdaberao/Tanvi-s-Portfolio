@@ -13,7 +13,7 @@ export function Hero() {
     >
       <div
         aria-hidden="true"
-        className="hero-pattern pointer-events-none"
+        className="hero-pattern absolute inset-0 pointer-events-none z-0"
       />
 
       <motion.div
