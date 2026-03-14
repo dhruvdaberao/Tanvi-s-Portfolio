@@ -102,9 +102,6 @@ export async function POST(request: NextRequest) {
           content,
           updatedAt: new Date(),
         },
-        $unset: {
-          "content.admin": "",
-        },
       },
       { upsert: true }
     );
