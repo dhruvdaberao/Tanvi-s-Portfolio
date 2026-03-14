@@ -4,23 +4,51 @@ import { extractYouTubeId } from "@/utils/video";
 import { verifyAdminToken } from "@/lib/security";
 
 function unauthorized() {
-  return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const mongoUri = process.env.MONGO_URI;
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!mongoUri || !jwtSecret) {
+      return NextResponse.json(
+        { success: false, error: "Missing environment variables" },
+        { status: 500 }
+      );
+    }
+
     const auth = request.headers.get("authorization") || "";
     const token = auth.replace("Bearer ", "").trim();
     if (!token || !verifyAdminToken(token)) return unauthorized();
 
-    const body = await request.json();
-    const incomingContent = body?.content;
-    if (!incomingContent || typeof incomingContent !== "object") {
-      return NextResponse.json({ success: false, message: "Invalid payload" }, { status: 400 });
+    const contentType = request.headers.get("content-type") || "";
+    if (!contentType.toLowerCase().includes("application/json")) {
+      return NextResponse.json(
+        { success: false, error: "Content-Type must be application/json" },
+        { status: 400 }
+      );
     }
 
-    const { admin: _legacyAdmin, ...sanitizedIncomingContent } = incomingContent;
-    const content = {
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ success: false, error: "Invalid JSON payload" }, { status: 400 });
+    }
+
+    const incomingContent =
+      typeof body === "object" && body !== null && "content" in body
+        ? (body as { content?: unknown }).content
+        : null;
+
+    if (!incomingContent || typeof incomingContent !== "object") {
+      return NextResponse.json({ success: false, error: "Invalid payload" }, { status: 400 });
+    }
+
+    const { admin: _legacyAdmin, ...sanitizedIncomingContent } = incomingContent as Record<string, any>;
+    const content: Record<string, any> = {
       ...sanitizedIncomingContent,
       video: {
         ...(sanitizedIncomingContent.video || {}),
@@ -36,8 +64,18 @@ export async function POST(request: NextRequest) {
     const resolvedThumbnail = content.video?.thumbnail || autoThumb;
     content.video.thumbnail = resolvedThumbnail;
 
-    const db = await getDb();
-    const result = await db.collection("site_content").updateOne(
+    let db;
+    try {
+      db = await getDb();
+    } catch (error) {
+      console.error("DB connection failed:", error);
+      return NextResponse.json(
+        { success: false, error: "Database connection failed" },
+        { status: 500 }
+      );
+    }
+
+    await db.collection("site_content").updateOne(
       { key: "global" },
       {
         $set: {
@@ -61,15 +99,15 @@ export async function POST(request: NextRequest) {
       { upsert: true }
     );
 
-    return NextResponse.json({
-      success: true,
-      matchedCount: result.matchedCount,
-      modifiedCount: result.modifiedCount,
-      upsertedId: result.upsertedId,
-      content,
-    });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ success: false, message: "Failed to update content" }, { status: 500 });
+    console.error("CONTENT SAVE FAILED:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Server error while saving content",
+      },
+      { status: 500 }
+    );
   }
 }

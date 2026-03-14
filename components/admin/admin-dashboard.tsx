@@ -56,8 +56,9 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
       await saveContent()
       setShowSaveMessage(true)
       setTimeout(() => setShowSaveMessage(false), 3000)
-    } catch {
-      alert("Failed to save changes")
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to save changes"
+      alert(message)
     }
   }
 
