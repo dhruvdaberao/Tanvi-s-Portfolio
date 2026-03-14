@@ -30,9 +30,10 @@ export async function POST(request: NextRequest) {
     const youtubeId = extractYouTubeId(videoUrl);
     const autoThumb = youtubeId
       ? `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`
-      : content.video?.thumbnail || "";
+      : "";
 
-    content.video.thumbnail = autoThumb;
+    const resolvedThumbnail = content.video?.thumbnail || autoThumb;
+    content.video.thumbnail = resolvedThumbnail;
 
     const db = await getDb();
     const result = await db.collection("site_content").updateOne(
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
           heroSubtitle: content.hero?.subtitle || "",
           profileImage: content.hero?.profilePhoto || "",
           videoIntroUrl: videoUrl,
-          videoThumbnail: autoThumb,
+          videoThumbnail: resolvedThumbnail,
           awardsCount: Number(content.awards?.countNumber || 0),
           socialLinks: content.social || {},
           backgroundMusicUrl: content.music?.fileUrl || "",

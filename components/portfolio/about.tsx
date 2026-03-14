@@ -2,10 +2,10 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import { useInView } from "framer-motion"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Quote, Play, X, User, Video as VideoIcon, AlertTriangle } from "lucide-react"
 import { useContent } from "@/components/portfolio/content-context"
-import { getVideoType, getEmbedUrl, isValidVideoUrl, getAutoThumbnail } from "@/utils/video"
+import { getVideoType, getEmbedUrl, isValidVideoUrl, getAutoThumbnail, extractYouTubeId, getYouTubeThumbnailFallback } from "@/utils/video"
 
 export function About() {
   const ref = useRef(null)
@@ -18,7 +18,11 @@ export function About() {
   const embedUrl = getEmbedUrl(content.video.url)
   const isValid = isValidVideoUrl(content.video.url)
   const resolvedThumbnail = getAutoThumbnail(content.video.url, content.video.thumbnail)
-  const [thumbError, setThumbError] = useState(false)
+  const [thumbnailSrc, setThumbnailSrc] = useState(resolvedThumbnail || "")
+
+  useEffect(() => {
+    setThumbnailSrc(resolvedThumbnail || "")
+  }, [resolvedThumbnail])
 
   return (
     <section id="about" className="relative overflow-hidden px-4 py-20 sm:px-6 sm:py-24 lg:py-32" ref={ref}>
@@ -85,13 +89,20 @@ export function About() {
                  className="glass-card mt-10 flex aspect-video w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 shadow-2xl transition-all duration-500 group hover:border-primary/50 hover:shadow-[0_0_30px_rgba(109,92,255,0.15)] sm:mt-12 sm:rounded-3xl"
                  onClick={() => setVideoOpen(true)}
               >
-                 {resolvedThumbnail && !thumbError ? (
+                 {thumbnailSrc ? (
                     <img
-                      src={resolvedThumbnail}
+                      src={thumbnailSrc}
                       loading="lazy"
                       alt="Video Thumbnail"
                       className="absolute w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      onError={() => setThumbError(true)}
+                      onError={() => {
+                        const youtubeId = extractYouTubeId(content.video.url)
+                        if (youtubeId && thumbnailSrc.includes("maxresdefault")) {
+                          setThumbnailSrc(getYouTubeThumbnailFallback(youtubeId))
+                          return
+                        }
+                        setThumbnailSrc("")
+                      }}
                     />
                  ) : (
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-muted/30 to-primary/5 flex flex-col items-center justify-center">

@@ -1,7 +1,8 @@
 export type SocialLink = { id: string; label: string; url: string };
-export type Award = { id: string; title: string; year: string; org: string };
-export type GalleryImage = { id: string; url: string; caption: string; year: string };
+export type Award = { id: string; title: string; year: string; org: string; description?: string };
+export type GalleryImage = { id: string; url: string; caption: string; year: string; title?: string };
 export type FeaturedWriting = { id: string; title: string; image: string; desc: string; category: string; readUrl: string };
+export type LinkCardItem = { id: string; title: string; description: string; image: string; link: string };
 
 export type ContentState = {
   admin: { pass: string };
@@ -11,6 +12,8 @@ export type ContentState = {
   about: { title: string; bio: string };
   video: { url: string; caption: string; thumbnail: string; title: string };
   writings: FeaturedWriting[];
+  blog: LinkCardItem[];
+  publications: LinkCardItem[];
   gallery: GalleryImage[];
   awards: { countNumber: number; list: Award[] };
   quote: { text: string };
@@ -27,6 +30,8 @@ export const defaultContent: ContentState = {
   about: { title: "Crafting stories that resonate", bio: "I am Tanvi Sirsat, a writer exploring the intersections of memory, identity, and the human condition." },
   video: { url: "", caption: "Meet Tanvi", thumbnail: "", title: "An Introduction" },
   writings: [],
+  blog: [],
+  publications: [],
   gallery: [],
   awards: { countNumber: 12, list: [] },
   quote: { text: "Every word we write is a bridge between what was and what could be." },
