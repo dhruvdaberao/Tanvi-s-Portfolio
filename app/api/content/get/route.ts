@@ -12,7 +12,7 @@ export async function GET() {
       db.collection("gallery_items").find({}).sort({ createdAt: -1 }).toArray(),
       db.collection("awards").find({}).sort({ year: -1, createdAt: -1 }).toArray(),
       db.collection("writings").find({}).sort({ createdAt: -1 }).toArray(),
-      db.collection("blog_posts").find({}).sort({ createdAt: -1 }).toArray(),
+      db.collection("blog_posts").find({ status: "published" }).sort({ createdAt: -1 }).toArray(),
       db.collection("publications").find({}).sort({ createdAt: -1 }).toArray(),
     ]);
 
@@ -71,9 +71,9 @@ export async function GET() {
       content.blog = blogPosts.map((item) => ({
         id: item._id instanceof ObjectId ? item._id.toString() : String(item._id || crypto.randomUUID()),
         title: item.title || "",
-        description: item.description || "",
-        image: item.image || "",
-        link: item.link || "",
+        description: (item.content || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 160),
+        image: item.coverImage || item.image || "",
+        link: item.slug ? `/blog/${item.slug}` : item.link || "",
       }));
     }
 
@@ -81,9 +81,9 @@ export async function GET() {
       content.publications = publications.map((item) => ({
         id: item._id instanceof ObjectId ? item._id.toString() : String(item._id || crypto.randomUUID()),
         title: item.title || "",
-        description: item.description || "",
-        image: item.image || "",
-        link: item.link || "",
+        description: (item.content || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 160),
+        image: item.coverImage || item.image || "",
+        link: item.slug ? `/blog/${item.slug}` : item.link || "",
       }));
     }
 
