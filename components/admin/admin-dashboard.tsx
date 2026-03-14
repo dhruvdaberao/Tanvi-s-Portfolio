@@ -305,22 +305,22 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
 
       {/* Sidebar */}
       <aside
-        className={`hide-scrollbar absolute inset-y-0 left-0 z-30 flex w-[85%] max-w-xs flex-col border-r border-border bg-purple-700 text-white transition-transform duration-300 lg:relative lg:w-64 lg:max-w-none lg:translate-x-0 ${
+        className={`hide-scrollbar absolute inset-y-0 left-0 z-30 flex w-[85%] max-w-xs flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-transform duration-300 lg:relative lg:w-64 lg:max-w-none lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="border-b border-border p-4">
+        <div className="border-b border-sidebar-border p-4">
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-muted"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-black/35 p-2 text-white backdrop-blur-md transition-colors hover:bg-black/45"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
-            <span className="text-lg font-medium text-primary">Edit Dashboard</span>
+            <span className="text-lg font-medium text-white">Edit Dashboard</span>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-muted lg:hidden"
+              className="ml-auto flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-white/15 lg:hidden"
             >
               <X className="h-4 w-4" />
             </button>
@@ -334,8 +334,8 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
               onClick={() => { setActiveSection(item.id); setSidebarOpen(false) }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 activeSection === item.id
-                  ? "bg-primary text-primary-foreground font-medium"
-                  : "hover:bg-white/10 text-purple-100 hover:text-white"
+                  ? "bg-[rgba(255,255,255,0.12)] text-white font-medium"
+                  : "hover:bg-[#6D5DF6] text-white/90 hover:text-white"
               }`}
             >
               <item.icon className="w-4 h-4" />
@@ -344,10 +344,10 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
           ))}
         </nav>
         
-        <div className="p-3 border-t border-border">
+        <div className="p-3 border-t border-sidebar-border">
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-100 hover:bg-red-500/80 hover:text-white transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/90 hover:bg-white/15 hover:text-white transition-colors"
           >
             <LogOut className="w-4 h-4" />
             Sign Out
@@ -356,11 +356,10 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
       </aside>
 
       {/* Main Content */}
-      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background bg-cover bg-center"
-        style={{ backgroundImage: "linear-gradient(rgba(17, 8, 35, 0.78), rgba(17, 8, 35, 0.82)), url(/banner.jpg)" }}>
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background">
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background p-3 sm:p-4 lg:p-6">
-          <div className="flex items-center gap-2"><button onClick={() => setSidebarOpen(true)} className="flex h-10 w-10 items-center justify-center rounded-lg border border-border hover:bg-muted lg:hidden"><Menu className="h-5 w-5" /></button><h2 className="font-serif text-lg tracking-tight text-primary sm:text-2xl">
+          <div className="flex items-center gap-2"><button onClick={() => setSidebarOpen(true)} className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-black/35 p-2 text-white backdrop-blur-md hover:bg-black/45 lg:hidden"><Menu className="h-5 w-5" /></button><h2 className="font-serif text-lg tracking-tight text-primary sm:text-2xl">
             {menuItems.find(m => m.id === activeSection)?.label}
           </h2></div>
           <button
