@@ -146,6 +146,26 @@
     display: none;
   }
 
+
+  .admin-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(120, 120, 120, 0.5) transparent;
+  }
+
+  .admin-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .admin-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .admin-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(120, 120, 120, 0.5);
+    border-radius: 6px;
+  }
+
   .glass-card {
     background: color-mix(in oklab, var(--card) 68%, transparent);
     backdrop-filter: blur(10px);

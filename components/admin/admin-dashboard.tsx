@@ -282,7 +282,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
   }
 
   return (
-    <div className="relative flex min-h-screen bg-background lg:pl-[260px]">
+    <div className="relative flex min-h-screen bg-background">
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -290,7 +290,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-20 bg-black/40 lg:hidden"
+            className="fixed inset-0 z-20 bg-black/40 lg:hidden"
             onClick={() => setSidebarOpen(false)}
             aria-label="Close sidebar overlay"
           />
@@ -299,7 +299,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
 
       {/* Sidebar */}
       <aside
-        className={`hide-scrollbar fixed inset-y-0 left-0 z-30 flex w-[85%] max-w-xs flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-transform duration-300 lg:w-[260px] lg:max-w-none lg:translate-x-0 ${
+        className={`admin-scrollbar fixed left-0 top-0 z-30 flex h-screen w-[260px] max-w-[85vw] flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-transform duration-300 lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -322,7 +322,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
           <span className="mt-3 block text-lg font-medium text-white">Edit Dashboard</span>
         </div>
 
-        <nav className="hide-scrollbar flex-1 space-y-1 overflow-y-auto p-3">
+        <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {menuItems.map((item) => (
             <button
               key={item.id}
@@ -351,7 +351,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
       </aside>
 
       {/* Main Content */}
-      <div className="relative flex min-w-0 flex-1 flex-col bg-background">
+      <div className="admin-scrollbar relative ml-0 flex h-screen min-w-0 flex-1 flex-col overflow-y-auto bg-background lg:ml-[260px]">
         {/* Header */}
         <div className="sticky top-0 z-10 border-b border-border bg-background px-4 py-4 sm:px-6 lg:px-10 lg:py-8">
           <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3">
@@ -377,7 +377,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
         </div>
 
         {/* Content Area */}
-        <div className="hide-scrollbar flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+        <div className="flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
           <div className="mx-auto max-w-5xl space-y-8 pb-12">
             
             {activeSection === "hero" && (
