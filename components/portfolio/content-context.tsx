@@ -42,7 +42,7 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
     const contentRes = await fetch("/api/content/update", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ content }),
+      body: JSON.stringify(content),
     })
     const contentData = await contentRes.json()
     if (!contentRes.ok || !contentData?.success) {
