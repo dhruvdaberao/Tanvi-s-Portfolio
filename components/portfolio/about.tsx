@@ -1,9 +1,9 @@
 "use client"
 
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
-import { Quote, Play, X, User, Video as VideoIcon, AlertTriangle } from "lucide-react"
+import { Quote, Play, User, Video as VideoIcon, AlertTriangle } from "lucide-react"
 import { useContent } from "@/components/portfolio/content-context"
 import { getVideoType, getEmbedUrl, isValidVideoUrl, getAutoThumbnail, extractYouTubeId, getYouTubeThumbnailCandidates } from "@/utils/video"
 
@@ -82,56 +82,84 @@ export function About() {
               {content.about.bio}
             </div>
 
-            {/* Video Thumbnail Card */}
+            {/* Video Inline Player */}
             {hasVideo && isValid && (
               <motion.div 
                  initial={{ opacity: 0, scale: 0.95 }}
                  animate={isInView ? { opacity: 1, scale: 1 } : {}}
                  transition={{ duration: 0.8, delay: 0.4 }}
-                 className="glass-card mt-10 flex aspect-video w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 shadow-2xl transition-all duration-500 group hover:border-primary/50 hover:shadow-[0_0_30px_rgba(109,92,255,0.15)] sm:mt-12 sm:rounded-3xl"
-                 onClick={() => setVideoOpen(true)}
+                 className="glass-card mt-10 relative aspect-video w-full overflow-hidden rounded-2xl border-2 shadow-2xl transition-all duration-500 sm:mt-12 sm:rounded-3xl bg-black"
               >
-                 {thumbnailSrc ? (
-                    <img
-                      src={thumbnailSrc}
-                      loading="lazy"
-                      alt="Video Thumbnail"
-                      className="absolute w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      onError={() => {
-                        if (!youtubeCandidates.length) {
-                          setThumbnailSrc("")
-                          return
-                        }
-
-                        const currentIndex = youtubeCandidates.indexOf(thumbnailSrc)
-                        const nextThumbnail = youtubeCandidates[currentIndex + 1]
-                        if (nextThumbnail) {
-                          setThumbnailSrc(nextThumbnail)
-                          return
-                        }
-
-                        setThumbnailSrc("")
-                      }}
-                    />
+                 {!videoOpen ? (
+                    <div 
+                      className="absolute inset-0 cursor-pointer group hover:border-primary/50 hover:shadow-[0_0_30px_rgba(109,92,255,0.15)]"
+                      onClick={() => setVideoOpen(true)}
+                    >
+                       {thumbnailSrc ? (
+                          <img
+                            src={thumbnailSrc}
+                            loading="lazy"
+                            alt="Video Thumbnail"
+                            className="absolute w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                            onError={() => {
+                              if (!youtubeCandidates.length) {
+                                setThumbnailSrc("")
+                                return
+                              }
+      
+                              const currentIndex = youtubeCandidates.indexOf(thumbnailSrc)
+                              const nextThumbnail = youtubeCandidates[currentIndex + 1]
+                              if (nextThumbnail) {
+                                setThumbnailSrc(nextThumbnail)
+                                return
+                              }
+      
+                              setThumbnailSrc("")
+                            }}
+                          />
+                       ) : (
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-muted/30 to-primary/5 flex flex-col items-center justify-center">
+                             <VideoIcon className="w-16 h-16 mb-4 text-muted-foreground/40" />
+                             <span className="text-sm font-medium text-muted-foreground/60">Video Preview</span>
+                          </div>
+                       )}
+                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500 flex items-center justify-center pointer-events-none pb-12 sm:pb-0">
+                          {/* Play button shifted slightly up on mobile (pb-12) to avoid overlap with bottom text */}
+                          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/90 flex items-center justify-center shadow-2xl backdrop-blur-sm relative pointer-events-auto">
+                             <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="absolute inset-0 bg-primary rounded-full" />
+                             <Play className="w-6 h-6 sm:w-8 sm:h-8 text-white ml-1 relative z-10" />
+                          </motion.div>
+                       </div>
+                       <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none">
+                          <h3 className="text-white font-serif text-lg sm:text-xl lg:text-2xl mb-1 truncate">{content.video.title || "An Introduction"}</h3>
+                          <p className="text-white/80 text-[10px] sm:text-xs font-medium uppercase tracking-widest">{content.video.caption || `Meet ${content.hero.name}`}</p>
+                       </div>
+                    </div>
                  ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-muted/30 to-primary/5 flex flex-col items-center justify-center">
-                       <VideoIcon className="w-16 h-16 mb-4 text-muted-foreground/40" />
-                       <span className="text-sm font-medium text-muted-foreground/60">Video Preview</span>
+                    <div className="absolute inset-0 w-full h-full bg-black">
+                       {(videoType === "youtube" || videoType === "vimeo") && embedUrl && (
+                         <iframe
+                           src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1`}
+                           title={content.video.title || `${content.hero.name} introduction video`}
+                           frameBorder="0"
+                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                           allowFullScreen
+                           className="w-full h-full border-none"
+                         />
+                       )}
+                       {videoType === "mp4" && (
+                         <video 
+                           src={content.video.url}
+                           controls 
+                           autoPlay
+                           playsInline
+                           className="w-full h-full object-contain"
+                         />
+                       )}
                     </div>
                  )}
-                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500 flex items-center justify-center">
-                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="w-20 h-20 rounded-full bg-primary/90 flex items-center justify-center shadow-2xl backdrop-blur-sm relative">
-                       <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="absolute inset-0 bg-primary rounded-full" />
-                       <Play className="w-8 h-8 text-white ml-1 relative z-10" />
-                    </motion.div>
-                 </div>
-                 <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-                    <h3 className="text-white font-serif text-xl sm:text-2xl mb-1 sm:mb-2">{content.video.title || "An Introduction"}</h3>
-                    <p className="text-white/80 text-xs sm:text-sm font-medium uppercase tracking-widest">{content.video.caption || `Meet ${content.hero.name}`}</p>
-                 </div>
               </motion.div>
             )}
-
             {/* Invalid URL Warning */}
             {hasVideo && !isValid && (
               <motion.div
@@ -146,60 +174,6 @@ export function About() {
           </motion.div>
         </div>
       </div>
-
-      {/* Video Modal */}
-      <AnimatePresence>
-        {videoOpen && hasVideo && isValid && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-3 backdrop-blur-md sm:p-5 md:p-6"
-            onClick={() => setVideoOpen(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="relative aspect-video w-[95vw] max-w-[900px] overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl md:w-[90vw]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Close Button */}
-              <button
-                onClick={() => setVideoOpen(false)}
-                className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all backdrop-blur-sm"
-              >
-                <X className="w-5 h-5 sm:w-6 sm:h-6" />
-              </button>
-              
-              {/* YouTube / Vimeo → iframe */}
-              {(videoType === "youtube" || videoType === "vimeo") && embedUrl && (
-                <iframe
-                  src={embedUrl}
-                  title={content.video.title || `${content.hero.name} introduction video`}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="absolute inset-0 w-full h-full bg-black border-none"
-                />
-              )}
-
-              {/* MP4 / local file → HTML5 video */}
-              {videoType === "mp4" && (
-                <video 
-                  src={content.video.url}
-                  controls 
-                  autoPlay
-                  playsInline
-                  className="absolute inset-0 w-full h-full object-contain rounded-2xl"
-                />
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </section>
   )
 }
