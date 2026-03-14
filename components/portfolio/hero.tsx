@@ -10,8 +10,16 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-screen items-center overflow-hidden px-4 pb-12 pt-28 sm:px-6 sm:pb-16 sm:pt-32 lg:pt-36"
+      className="relative flex min-h-screen items-center overflow-hidden px-4 py-20 sm:px-6 md:py-28"
     >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-5"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 20% 30%, rgba(140,120,255,0.35) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(160,140,255,0.28) 0%, transparent 45%), radial-gradient(circle at 50% 50%, rgba(124,58,237,0.2) 0%, transparent 55%)",
+        }}
+      />
       <motion.div
         initial={{ opacity: 0, scale: 0.5, x: -100 }}
         animate={{ opacity: [0.15, 0.25, 0.15], scale: [1, 1.2, 1], x: [-50, 0, -50] }}
@@ -25,14 +33,25 @@ export function Hero() {
         className="pointer-events-none absolute -right-16 bottom-8 h-80 w-80 rounded-full bg-gradient-to-tl from-secondary/30 via-primary/20 to-transparent blur-3xl sm:h-[34rem] sm:w-[34rem]"
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-10 lg:grid lg:grid-cols-5 lg:items-center lg:gap-14 xl:gap-16">
-        <div className="order-2 text-center lg:order-1 lg:col-span-3 lg:text-left">
+      <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center text-center">
+        <div className="w-full max-w-3xl">
+          {content.hero.name && (
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="font-serif text-4xl font-semibold tracking-tight text-foreground md:text-6xl"
+            >
+              {content.hero.name}
+            </motion.h1>
+          )}
+
           {content.hero.badge && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, delay: 0.1 }}
-              className="mb-5"
+              transition={{ duration: 1, delay: 0.5 }}
+              className="mt-5"
             >
               <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-[11px] uppercase tracking-[0.2em] text-primary sm:text-xs">
                 <Sparkles className="h-3.5 w-3.5 shrink-0" />
@@ -45,63 +64,23 @@ export function Hero() {
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="mb-3 text-xs uppercase tracking-[0.26em] text-muted-foreground sm:mb-4 sm:text-sm"
+              transition={{ duration: 0.8, delay: 0.25 }}
+              className="mt-3 text-lg tracking-wide text-muted-foreground md:text-xl"
             >
               {content.hero.subtitle}
             </motion.p>
           )}
-
-          {content.hero.quote && (
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="mb-6 break-words font-serif text-3xl leading-[1.15] tracking-tight sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl"
-            >
-              <motion.span
-                className="block italic text-foreground"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-              >
-                {'"'}{content.hero.quote}{'"'}
-              </motion.span>
-            </motion.h1>
-          )}
-
-          {content.hero.name && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.9 }}
-              className="mb-2 flex flex-wrap items-center justify-center gap-3 text-muted-foreground lg:justify-start"
-            >
-              <motion.span
-                initial={{ width: 0 }}
-                animate={{ width: 40 }}
-                transition={{ duration: 0.6, delay: 1.1 }}
-                className="h-px bg-primary/40"
-              />
-              <span className="text-xs font-medium uppercase tracking-[0.25em] sm:text-sm">{content.hero.name}</span>
-              <motion.span
-                initial={{ width: 0 }}
-                animate={{ width: 40 }}
-                transition={{ duration: 0.6, delay: 1.1 }}
-                className="h-px bg-primary/40"
-              />
-            </motion.div>
-          )}
         </div>
 
-        <div className="order-1 flex justify-center lg:order-2 lg:col-span-2 lg:justify-end">
+        <div className="mt-10 flex justify-center">
           {content.hero.profilePhoto && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, x: 50 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              transition={{ duration: 1, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="relative"
             >
+              <div className="pointer-events-none absolute inset-5 rounded-full bg-purple-400/20 blur-3xl sm:inset-8" />
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
@@ -122,7 +101,7 @@ export function Hero() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 1.4 }}
-                  className="absolute -bottom-2 left-1/2 z-20 -translate-x-1/2 rounded-full border border-border bg-card px-4 py-2 text-center shadow-lg sm:-bottom-3 sm:px-5 sm:py-2.5 lg:-right-4 lg:left-auto lg:translate-x-0"
+                  className="absolute -bottom-2 left-1/2 z-20 -translate-x-1/2 rounded-full border border-border bg-card px-4 py-2 text-center shadow-lg sm:-bottom-3 sm:px-5 sm:py-2.5"
                 >
                   <span className="whitespace-nowrap text-xs font-medium tracking-wide text-primary sm:text-sm">
                     {content.awards.countNumber}+ Awards
@@ -130,6 +109,26 @@ export function Hero() {
                 </motion.div>
               )}
             </motion.div>
+          )}
+        </div>
+
+        <div className="mt-10 w-full max-w-4xl">
+          {content.hero.quote && (
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.75 }}
+              className="break-words font-serif text-2xl leading-[1.25] tracking-tight text-foreground sm:text-3xl md:text-4xl"
+            >
+              <motion.span
+                className="block italic text-foreground"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.85 }}
+              >
+                {'"'}{content.hero.quote}{'"'}
+              </motion.span>
+            </motion.p>
           )}
         </div>
       </div>
