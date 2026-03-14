@@ -153,3 +153,11 @@ export function getAutoThumbnail(
 export function getYouTubeThumbnailFallback(videoId: string): string {
   return getYouTubeThumbnail(videoId, "hqdefault")
 }
+
+export function getYouTubeThumbnailCandidates(videoId: string): string[] {
+  return [
+    getYouTubeThumbnail(videoId, "maxresdefault"),
+    getYouTubeThumbnail(videoId, "hqdefault"),
+    getYouTubeThumbnail(videoId, "mqdefault"),
+  ]
+}

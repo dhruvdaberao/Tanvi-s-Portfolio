@@ -6,9 +6,9 @@ import { defaultContent } from "@/lib/content";
 export async function GET() {
   try {
     const db = await getDb();
-    const siteContent = await db.collection("site_content").findOne({ key: "global" });
-
-    const [galleryItems, awardItems, writings, blogPosts, publications] = await Promise.all([
+    const [siteContent, videoSection, galleryItems, awardItems, writings, blogPosts, publications] = await Promise.all([
+      db.collection("site_content").findOne({ key: "global" }),
+      db.collection("site_content").findOne({ type: "video_section" }),
       db.collection("gallery_items").find({}).sort({ createdAt: -1 }).toArray(),
       db.collection("awards").find({}).sort({ year: -1, createdAt: -1 }).toArray(),
       db.collection("writings").find({}).sort({ createdAt: -1 }).toArray(),
@@ -16,9 +16,21 @@ export async function GET() {
       db.collection("publications").find({}).sort({ createdAt: -1 }).toArray(),
     ]);
 
+    const savedContent = siteContent?.content || {};
+    const fallbackVideoUrl =
+      videoSection?.videoUrl || siteContent?.videoIntroUrl || savedContent.video?.url || "";
+    const fallbackVideoThumbnail =
+      videoSection?.videoThumbnail || siteContent?.videoThumbnail || savedContent.video?.thumbnail || "";
+
     const content = {
       ...defaultContent,
-      ...(siteContent?.content || {}),
+      ...savedContent,
+      video: {
+        ...defaultContent.video,
+        ...(savedContent.video || {}),
+        url: fallbackVideoUrl,
+        thumbnail: fallbackVideoThumbnail,
+      },
     };
 
     if (galleryItems.length > 0) {
@@ -75,7 +87,12 @@ export async function GET() {
       }));
     }
 
-    return NextResponse.json({ success: true, content });
+    return NextResponse.json({
+      success: true,
+      content,
+      videoUrl: content.video.url,
+      videoThumbnail: content.video.thumbnail,
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ success: false, message: "Failed to fetch content" }, { status: 500 });
