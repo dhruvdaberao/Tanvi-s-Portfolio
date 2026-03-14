@@ -75,7 +75,7 @@ export function AdminModal({ open, onOpenChange }: AdminModalProps) {
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="w-full max-w-md overflow-hidden rounded-2xl border border-border bg-background shadow-2xl"
+          className="w-full max-w-md overflow-hidden rounded-2xl border border-border bg-background shadow-lg"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="p-8">

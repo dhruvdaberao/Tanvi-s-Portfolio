@@ -31,7 +31,7 @@ export default function PublicationsPage() {
         ) : (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {pagedItems.map((item) => (
-              <article key={item.id} className="rounded-2xl border border-border bg-card p-5">
+              <article key={item.id} className="rounded-2xl border border-border bg-card p-5 shadow-md transition-shadow duration-200 hover:shadow-lg">
                 {item.image ? (
                   <div className="mb-5 aspect-[3/2] w-full rounded-lg overflow-hidden relative">
                     <Image src={item.image} alt={item.title} fill unoptimized className="object-cover" />
