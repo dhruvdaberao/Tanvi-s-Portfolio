@@ -152,3 +152,67 @@
     border: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
   }
 }
+
+.editorial-content {
+  font-family: var(--font-sans), Inter, system-ui, sans-serif;
+  line-height: 1.9;
+  font-size: 1.06rem;
+}
+
+.editorial-content h1,
+.editorial-content h2,
+.editorial-content h3,
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+  font-family: var(--font-serif), 'Playfair Display', Georgia, serif;
+  line-height: 1.3;
+  margin: 1.4em 0 0.55em;
+}
+
+.editorial-content h1,
+.ProseMirror h1 { font-size: 2rem; }
+.editorial-content h2,
+.ProseMirror h2 { font-size: 1.6rem; }
+.editorial-content h3,
+.ProseMirror h3 { font-size: 1.35rem; }
+
+.editorial-content p,
+.ProseMirror p {
+  margin: 1em 0;
+}
+
+.editorial-content ul,
+.editorial-content ol,
+.ProseMirror ul,
+.ProseMirror ol {
+  margin: 1em 0 1em 1.3em;
+}
+
+.editorial-content blockquote,
+.ProseMirror blockquote {
+  border-left: 3px solid var(--color-primary);
+  margin: 1.2em 0;
+  padding-left: 1rem;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.editorial-content img,
+.ProseMirror img {
+  width: 100%;
+  border-radius: 0.75rem;
+  margin: 1.2rem 0;
+}
+
+.ProseMirror {
+  min-height: 300px;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--muted-foreground);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

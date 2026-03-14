@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { useContent, FeaturedWriting, GalleryImage, Award } from "@/components/portfolio/content-context"
 import { getVideoType, isValidVideoUrl, getAutoThumbnail } from "@/utils/video"
 import { motion, AnimatePresence } from "framer-motion"
+import { BlogManager } from "@/components/admin/blog-manager"
 import { 
   ArrowLeft, Save, LogOut, Home, User, BookOpen, 
   Image as ImageIcon, Award as AwardIcon, MessageSquare,
@@ -213,18 +214,6 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
   }
   const removeWriting = (id: string) => {
     updateContent("writings", null, content.writings.filter(w => w.id !== id))
-  }
-
-  const addBlog = () => {
-    const newItems = [...(content.blog || []), { id: Date.now().toString(), title: "", description: "", image: "", link: "" }]
-    updateContent("blog", null, newItems)
-  }
-  const updateBlog = (id: string, field: string, value: string) => {
-    const newItems = (content.blog || []).map(item => item.id === id ? { ...item, [field]: value } : item)
-    updateContent("blog", null, newItems)
-  }
-  const removeBlog = (id: string) => {
-    updateContent("blog", null, (content.blog || []).filter(item => item.id !== id))
   }
 
   const addPublication = () => {
@@ -693,29 +682,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
             )}
 
             {activeSection === "blog" && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <p className="text-muted-foreground">Manage blog cards.</p>
-                  <button onClick={addBlog} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg font-medium hover:bg-primary hover:text-white transition-all">
-                    <Plus className="w-4 h-4" /> Add Entry
-                  </button>
-                </div>
-                {(content.blog || []).length === 0 ? (
-                  <div className="text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">No blog entries yet.</div>
-                ) : (
-                  <div className="space-y-4">{(content.blog || []).map((item) => (
-                    <div key={item.id} className="bg-card rounded-xl p-4 border border-border space-y-3">
-                      <div className="flex justify-end"><button onClick={() => removeBlog(item.id)} className="text-destructive"><Trash2 className="w-4 h-4" /></button></div>
-                      <input value={item.title} onChange={(e) => updateBlog(item.id, "title", e.target.value)} placeholder="Title" className="w-full px-3 py-2 bg-background border border-border rounded-lg" />
-                      <textarea value={item.description} onChange={(e) => updateBlog(item.id, "description", e.target.value)} placeholder="Description" className="w-full px-3 py-2 bg-background border border-border rounded-lg" rows={3} />
-                      <input value={item.link} onChange={(e) => updateBlog(item.id, "link", e.target.value)} placeholder="Link" className="w-full px-3 py-2 bg-background border border-border rounded-lg" />
-                      <label className="border border-dashed border-border rounded-lg p-4 text-sm text-center cursor-pointer block">Upload image
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (res) => updateBlog(item.id, "image", res))} />
-                      </label>
-                    </div>
-                  ))}</div>
-                )}
-              </div>
+              <BlogManager />
             )}
 
             {activeSection === "publications" && (
