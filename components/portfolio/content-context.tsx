@@ -46,7 +46,7 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
     })
     const contentData = await contentRes.json()
     if (!contentRes.ok || !contentData?.success) {
-      throw new Error(contentData?.message || "Failed to save content")
+      throw new Error(contentData?.error || contentData?.message || "Failed to save content")
     }
 
     const videoThumbnail = content.video.thumbnail || ""
@@ -60,7 +60,7 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
     })
     const videoData = await videoRes.json()
     if (!videoRes.ok || !videoData?.success) {
-      throw new Error(videoData?.message || "Failed to save video section")
+      throw new Error(videoData?.error || videoData?.message || "Failed to save video section")
     }
 
     await mutate()
