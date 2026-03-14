@@ -4,7 +4,7 @@ import { extractYouTubeId } from "@/utils/video";
 import { verifyAdminToken } from "@/lib/security";
 
 function unauthorized() {
-  return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 }
 
 export async function POST(request: NextRequest) {
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const incomingContent = body?.content;
     if (!incomingContent || typeof incomingContent !== "object") {
-      return NextResponse.json({ success: false, error: "Invalid payload" }, { status: 400 });
+      return NextResponse.json({ success: false, message: "Invalid payload" }, { status: 400 });
     }
 
     const content = {
@@ -66,6 +66,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ success: false, error: "Failed to update content" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Failed to update content" }, { status: 500 });
   }
 }

@@ -20,7 +20,7 @@ export function Awards() {
         className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,var(--primary)_0%,transparent_50%)]"
       />
 
-      <div className="max-w-7xl mx-auto relative">
+      <div className="mx-auto max-w-6xl px-4 relative">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -39,7 +39,7 @@ export function Awards() {
             No content added yet.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mx-auto">
             {awards.map((award, index) => (
               <motion.div
                 key={award.id}

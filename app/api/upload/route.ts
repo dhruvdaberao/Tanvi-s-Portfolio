@@ -5,13 +5,13 @@ import { verifyAdminToken } from "@/lib/security";
 export async function POST(request: NextRequest) {
   try {
     const token = (request.headers.get("authorization") || "").replace("Bearer ", "").trim();
-    if (!verifyAdminToken(token)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!verifyAdminToken(token)) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const folder = String(formData.get("folder") || "portfolio");
 
-    if (!file) return NextResponse.json({ error: "File required" }, { status: 400 });
+    if (!file) return NextResponse.json({ success: false, message: "File required" }, { status: 400 });
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
@@ -21,6 +21,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, secure_url: result.secure_url });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Upload failed" }, { status: 500 });
   }
 }

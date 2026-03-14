@@ -43,7 +43,7 @@ export function Contact() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Something went wrong. Please try again.')
+        throw new Error(data.message || data.error || 'Something went wrong. Please try again.')
       }
 
       setSubmitted(true)
@@ -60,7 +60,7 @@ export function Contact() {
     <section id="contact" className="relative overflow-hidden px-4 py-20 sm:px-6 sm:py-24 lg:py-32" ref={ref}>
       <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/30 -skew-x-12 translate-x-1/4 hidden lg:block" />
       
-      <div className="max-w-7xl mx-auto relative">
+      <div className="mx-auto max-w-6xl px-4 relative">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -78,12 +78,12 @@ export function Contact() {
           </p>
         </motion.div>
 
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16 xl:gap-20">
+        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-12 lg:gap-16 xl:gap-20">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8 }}
-            className="lg:col-span-5 space-y-6"
+            className="lg:col-span-5 space-y-6 mx-auto w-full"
           >
             {content.contact.email && (
                <div className="glass-card rounded-2xl border p-5 transition-shadow duration-300 hover:shadow-lg sm:p-6">
@@ -95,7 +95,7 @@ export function Contact() {
                      <p className="text-sm text-muted-foreground mb-1">Email</p>
                      <a
                        href={`mailto:${content.contact.email}`}
-                       className="text-lg font-medium text-foreground hover:text-primary transition-colors inline-flex items-center gap-2 group"
+                       className="inline-flex break-all text-lg font-medium text-foreground transition-colors hover:text-primary items-center gap-2 group"
                      >
                        {content.contact.email}
                        <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -164,7 +164,7 @@ export function Contact() {
             initial={{ opacity: 0, y: 40 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="lg:col-span-7"
+            className="lg:col-span-7 mx-auto w-full"
           >
             <div className="glass-card rounded-2xl border p-5 sm:p-7 md:p-10">
               {submitted ? (

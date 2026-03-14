@@ -15,7 +15,7 @@ export function Gallery() {
 
   return (
     <section id="gallery" className="px-4 py-20 sm:px-6 sm:py-24 lg:py-32" ref={ref}>
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-6xl px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -34,7 +34,7 @@ export function Gallery() {
             No content added yet.
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 sm:gap-5">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 sm:gap-5">
             {galleryImages.map((image, index) => (
               <motion.div
                 key={image.id}
@@ -46,20 +46,21 @@ export function Gallery() {
                   whileHover={{ y: -2 }}
                   transition={{ duration: 0.2 }}
                   onClick={() => setSelectedImage(index)}
-                  className="glass-card group relative w-full overflow-hidden rounded-xl text-left"
+                  className="glass-card group relative mx-auto w-full overflow-hidden rounded-xl text-left"
                 >
-                  <div className="relative aspect-[4/5]">
+                  <div className="relative flex aspect-[4/5] items-center justify-center">
                     <img
                       src={image.url}
                       alt={image.title || image.caption || "Gallery image"}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
-                  <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-foreground/85 via-foreground/30 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                    <span className="mb-1 text-xs uppercase tracking-wider text-primary-foreground/80">{image.year}</span>
-                    <span className="line-clamp-2 text-sm font-medium text-white sm:text-base">{image.title || image.caption}</span>
-                  </div>
+
                 </motion.button>
+                <div className="mt-3 text-center">
+                  <p className="line-clamp-2 text-sm font-medium sm:text-base">{image.title || image.caption}</p>
+                  <p className="text-xs text-muted-foreground sm:text-sm">{image.year}</p>
+                </div>
               </motion.div>
             ))}
           </div>
