@@ -11,7 +11,6 @@ import { Gallery } from "@/components/portfolio/gallery"
 import { QuoteSection } from "@/components/portfolio/quote-section"
 import { Contact } from "@/components/portfolio/contact"
 import { Footer } from "@/components/portfolio/footer"
-import { MusicPlayer } from "@/components/portfolio/music-player"
 
 import { useContent } from "@/components/portfolio/content-context"
 
@@ -36,7 +35,6 @@ export default function Home() {
       {visibility.contact && <Contact />}
       
       <Footer />
-      <MusicPlayer />
     </main>
   )
 }

@@ -16,13 +16,13 @@ export function Navigation() {
   const [activeSection, setActiveSection] = React.useState<string>("")
 
   const navItems = [
-    { id: "about", label: content.navbar.about, href: "#about" },
-    { id: "writing", label: content.navbar.writings, href: "#writings" },
-    { id: "blog", label: content.navbar.blog, href: "#blog" },
-    { id: "publications", label: content.navbar.publications, href: "#publications" },
-    { id: "awards", label: content.navbar.awards, href: "#awards" },
-    { id: "gallery", label: content.navbar.gallery, href: "#gallery" },
-    { id: "contact", label: content.navbar.contact, href: "#contact" },
+    { id: "about", label: content.navbar.about, href: "/#about" },
+    { id: "writing", label: content.navbar.writings, href: "/writings" },
+    { id: "blog", label: content.navbar.blog, href: "/blog" },
+    { id: "publications", label: content.navbar.publications, href: "/publications" },
+    { id: "awards", label: content.navbar.awards, href: "/awards" },
+    { id: "gallery", label: content.navbar.gallery, href: "/gallery" },
+    { id: "contact", label: content.navbar.contact, href: "/#contact" },
   ]
 
   const visibleNavItems = navItems.filter((item) => {
@@ -35,7 +35,7 @@ export function Navigation() {
     const handleScroll = () => {
       setScrolled(window.scrollY > 24)
 
-      const sections = visibleNavItems.map((item) => item.href.substring(1))
+      const sections = visibleNavItems.filter((item) => item.href.startsWith("/#")).map((item) => item.href.substring(2))
       let current = ""
 
       for (const section of sections) {
@@ -125,7 +125,7 @@ export function Navigation() {
                   className="relative block whitespace-nowrap px-3 py-2 text-sm tracking-wide text-muted-foreground transition-colors duration-200 hover:text-foreground xl:px-4"
                 >
                   {item.label}
-                  {activeSection === item.href.substring(1) && (
+                  {activeSection === item.href.replace("/#", "") && (
                     <motion.div
                       layoutId="active-nav-indicator"
                       className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-primary xl:left-4 xl:right-4"
@@ -181,13 +181,13 @@ export function Navigation() {
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
                       className={`relative block rounded-xl px-4 py-3 text-base font-medium transition-colors ${
-                        activeSection === item.href.substring(1)
+                        activeSection === item.href.replace("/#", "")
                           ? "bg-primary/10 text-primary"
                           : "text-foreground hover:bg-primary/5 hover:text-primary"
                       }`}
                     >
                       {item.label}
-                      {activeSection === item.href.substring(1) && (
+                      {activeSection === item.href.replace("/#", "") && (
                         <span className="absolute bottom-2 left-4 h-0.5 w-10 rounded-full bg-primary" />
                       )}
                     </Link>

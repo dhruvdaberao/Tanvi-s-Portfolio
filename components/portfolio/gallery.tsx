@@ -3,6 +3,8 @@
 import { motion, useInView, AnimatePresence } from "framer-motion"
 import { useRef, useState } from "react"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
 import { useContent } from "./content-context"
 
 export function Gallery() {
@@ -12,6 +14,7 @@ export function Gallery() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
 
   const galleryImages = content.gallery || []
+  const previewImages = galleryImages.slice(0, 6)
 
   return (
     <section id="gallery" className="px-4 py-20 sm:px-6 sm:py-24 lg:py-32" ref={ref}>
@@ -35,7 +38,7 @@ export function Gallery() {
           </div>
         ) : (
           <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 sm:gap-5">
-            {galleryImages.map((image, index) => (
+            {previewImages.map((image, index) => (
               <motion.div
                 key={image.id}
                 initial={{ opacity: 0, y: 30 }}
@@ -49,13 +52,14 @@ export function Gallery() {
                   className="glass-card group relative mx-auto w-full overflow-hidden rounded-xl text-left"
                 >
                   <div className="relative flex aspect-[4/5] items-center justify-center">
-                    <img
+                    <Image
                       src={image.url}
                       alt={image.title || image.caption || "Gallery image"}
+                      fill
+                      unoptimized
                       className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
-
                 </motion.button>
                 <div className="mt-3 text-center">
                   <p className="line-clamp-2 text-sm font-medium sm:text-base">{image.title || image.caption}</p>
@@ -65,10 +69,16 @@ export function Gallery() {
             ))}
           </div>
         )}
+
+        {galleryImages.length > 0 ? (
+          <div className="mt-10 text-center">
+            <Link href="/gallery" className="text-sm font-medium text-primary">View All →</Link>
+          </div>
+        ) : null}
       </div>
 
       <AnimatePresence>
-        {selectedImage !== null && galleryImages[selectedImage] && (
+        {selectedImage !== null && previewImages[selectedImage] && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -76,17 +86,14 @@ export function Gallery() {
             className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/95 backdrop-blur-md"
             onClick={() => setSelectedImage(null)}
           >
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-background/20 text-white transition-colors hover:bg-background/30 sm:right-6 sm:top-6 sm:h-12 sm:w-12"
-            >
+            <button onClick={() => setSelectedImage(null)} className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-background/20 text-white transition-colors hover:bg-background/30 sm:right-6 sm:top-6 sm:h-12 sm:w-12">
               <X className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
 
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                if (selectedImage !== null) setSelectedImage((selectedImage - 1 + galleryImages.length) % galleryImages.length)
+                if (selectedImage !== null) setSelectedImage((selectedImage - 1 + previewImages.length) % previewImages.length)
               }}
               className="absolute left-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background/20 text-white transition-colors hover:bg-background/30 sm:left-6 sm:h-12 sm:w-12"
             >
@@ -95,7 +102,7 @@ export function Gallery() {
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                if (selectedImage !== null) setSelectedImage((selectedImage + 1) % galleryImages.length)
+                if (selectedImage !== null) setSelectedImage((selectedImage + 1) % previewImages.length)
               }}
               className="absolute right-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background/20 text-white transition-colors hover:bg-background/30 sm:right-6 sm:h-12 sm:w-12"
             >
@@ -112,15 +119,17 @@ export function Gallery() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
-                <img
-                  src={galleryImages[selectedImage].url}
-                  alt={galleryImages[selectedImage].title || galleryImages[selectedImage].caption}
+                <Image
+                  src={previewImages[selectedImage].url}
+                  alt={previewImages[selectedImage].title || previewImages[selectedImage].caption}
+                  fill
+                  unoptimized
                   className="h-full w-full object-contain"
                 />
               </div>
               <div className="mt-4 space-y-1 text-center">
-                <p className="font-medium text-white">{galleryImages[selectedImage].title || galleryImages[selectedImage].caption}</p>
-                <p className="text-sm text-white/60">{galleryImages[selectedImage].year}</p>
+                <p className="font-medium text-white">{previewImages[selectedImage].title || previewImages[selectedImage].caption}</p>
+                <p className="text-sm text-white/60">{previewImages[selectedImage].year}</p>
               </div>
             </motion.div>
           </motion.div>

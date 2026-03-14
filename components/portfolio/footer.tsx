@@ -86,11 +86,13 @@ export function Footer() {
   ].filter((social) => Boolean(social.href))
 
   const navItems = [
-    { label: content.navbar.about, href: "#about", visible: content.visibility.about },
-    { label: content.navbar.writings, href: "#writings", visible: content.visibility.writings },
-    { label: content.navbar.blog, href: "#blog", visible: content.visibility.blog },
-    { label: content.navbar.publications, href: "#publications", visible: content.visibility.publications },
-    { label: content.navbar.contact, href: "#contact", visible: content.visibility.contact },
+    { label: content.navbar.about, href: "/#about", visible: content.visibility.about },
+    { label: content.navbar.writings, href: "/writings", visible: content.visibility.writings },
+    { label: content.navbar.blog, href: "/blog", visible: content.visibility.blog },
+    { label: content.navbar.publications, href: "/publications", visible: content.visibility.publications },
+    { label: content.navbar.awards, href: "/awards", visible: content.visibility.awards },
+    { label: content.navbar.gallery, href: "/gallery", visible: content.visibility.gallery },
+    { label: content.navbar.contact, href: "/#contact", visible: content.visibility.contact },
   ].filter((item) => item.visible && item.label)
 
   const featuredWriting = content.writings[0]

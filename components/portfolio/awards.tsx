@@ -3,6 +3,7 @@
 import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
 import { Award as AwardIcon } from "lucide-react"
+import Link from "next/link"
 import { useContent } from "@/components/portfolio/content-context"
 
 export function Awards() {
@@ -40,7 +41,7 @@ export function Awards() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mx-auto">
-            {awards.map((award, index) => (
+            {awards.slice(0, 3).map((award, index) => (
               <motion.div
                 key={award.id}
                 initial={{ opacity: 0, y: 30 }}
@@ -68,6 +69,12 @@ export function Awards() {
             ))}
           </div>
         )}
+
+        {awards.length > 0 ? (
+          <div className="mt-10 text-center">
+            <Link href="/awards" className="text-sm font-medium text-primary">View All →</Link>
+          </div>
+        ) : null}
       </div>
     </section>
   )

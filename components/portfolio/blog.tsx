@@ -4,6 +4,7 @@ import { motion, useInView } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import type { BlogPost } from "@/lib/blog"
 import { getExcerptFromHtml } from "@/lib/blog"
 
@@ -41,7 +42,7 @@ export function Blog() {
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-muted-foreground">No published articles yet.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mx-auto">
-            {posts.slice(0, 6).map((post, index) => (
+            {posts.slice(0, 3).map((post, index) => (
               <motion.article
                 key={post.id}
                 initial={{ opacity: 0, y: 40 }}
@@ -51,7 +52,15 @@ export function Blog() {
               >
                 <Link href={`/blog/${post.slug}`} className="block">
                   <div className="relative aspect-[3/2] overflow-hidden rounded-lg bg-muted mb-5">
-                    {post.coverImage ? <img src={post.coverImage} alt={post.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" /> : null}
+                    {post.coverImage ? (
+                      <Image
+                        src={post.coverImage}
+                        alt={post.title}
+                        fill
+                        unoptimized
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    ) : null}
                   </div>
                   <h3 className="font-serif text-xl tracking-tight mb-2 group-hover:text-primary transition-colors duration-300">{post.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 mb-3">{getExcerptFromHtml(post.content)}</p>
@@ -61,6 +70,14 @@ export function Blog() {
             ))}
           </div>
         )}
+
+        {posts.length > 0 ? (
+          <div className="mt-10 text-center">
+            <Link href="/blog" className="text-sm font-medium text-primary">
+              View All →
+            </Link>
+          </div>
+        ) : null}
       </div>
     </section>
   )
