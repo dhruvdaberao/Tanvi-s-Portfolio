@@ -148,3 +148,8 @@ export function getAutoThumbnail(
   // 3. No thumbnail available
   return null
 }
+
+
+export function getYouTubeThumbnailFallback(videoId: string): string {
+  return getYouTubeThumbnail(videoId, "hqdefault")
+}

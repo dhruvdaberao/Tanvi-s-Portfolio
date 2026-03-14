@@ -2,7 +2,7 @@
 
 import { motion, useInView } from "framer-motion"
 import { useRef, useCallback } from "react"
-import { ArrowUpRight, ChevronLeft, ChevronRight, BookOpen } from "lucide-react"
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react"
 import useEmblaCarousel from 'embla-carousel-react'
 import { useContent } from "@/components/portfolio/content-context"
 
@@ -25,9 +25,7 @@ export function FeaturedWritings() {
     if (emblaApi) emblaApi.scrollNext()
   }, [emblaApi])
 
-  if (!content.writings || content.writings.length === 0) {
-    return null; // Won't render if empty per requirement
-  }
+  const writings = content.writings || []
 
   return (
     <section id="writings" className="relative overflow-hidden bg-secondary/50 px-4 py-20 sm:px-6 sm:py-24 lg:py-32" ref={ref}>
@@ -55,6 +53,11 @@ export function FeaturedWritings() {
           </div>
         </motion.div>
 
+        {writings.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-muted-foreground">
+            No content added yet.
+          </div>
+        ) : (
         <motion.div 
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
@@ -63,7 +66,7 @@ export function FeaturedWritings() {
           ref={emblaRef}
         >
           <div className="flex gap-6 pb-8">
-            {content.writings.map((writing) => (
+            {writings.map((writing) => (
               <div 
                 key={writing.id} 
                 className="flex-[0_0_100%] min-w-0 md:flex-[0_0_calc(50%-1.5rem)] lg:flex-[0_0_calc(33.333%-1.5rem)] relative group"
@@ -106,6 +109,7 @@ export function FeaturedWritings() {
             ))}
           </div>
         </motion.div>
+        )}
       </div>
     </section>
   )

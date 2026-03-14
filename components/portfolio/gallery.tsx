@@ -11,16 +11,7 @@ export function Gallery() {
   const { content } = useContent()
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
 
-  const galleryImages = content.gallery
-  if (!galleryImages || galleryImages.length === 0) return null
-
-  const nextImage = () => {
-    if (selectedImage !== null) setSelectedImage((selectedImage + 1) % galleryImages.length)
-  }
-
-  const prevImage = () => {
-    if (selectedImage !== null) setSelectedImage((selectedImage - 1 + galleryImages.length) % galleryImages.length)
-  }
+  const galleryImages = content.gallery || []
 
   return (
     <section id="gallery" className="px-4 py-20 sm:px-6 sm:py-24 lg:py-32" ref={ref}>
@@ -38,39 +29,45 @@ export function Gallery() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-          {galleryImages.map((image, index) => (
-            <motion.div
-              key={image.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
-            >
-              <motion.button
-                whileHover={{ y: -2 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => setSelectedImage(index)}
-                className="glass-card group relative w-full overflow-hidden rounded-xl text-left"
+        {galleryImages.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-muted-foreground">
+            No content added yet.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 sm:gap-5">
+            {galleryImages.map((image, index) => (
+              <motion.div
+                key={image.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
               >
-                <div className="relative aspect-[4/5]">
-                  <img
-                    src={image.url}
-                    alt={image.caption || "Gallery image"}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-foreground/85 via-foreground/30 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  <span className="mb-1 text-xs uppercase tracking-wider text-primary-foreground/80">{image.year}</span>
-                  <span className="line-clamp-2 text-sm font-medium text-white sm:text-base">{image.caption}</span>
-                </div>
-              </motion.button>
-            </motion.div>
-          ))}
-        </div>
+                <motion.button
+                  whileHover={{ y: -2 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => setSelectedImage(index)}
+                  className="glass-card group relative w-full overflow-hidden rounded-xl text-left"
+                >
+                  <div className="relative aspect-[4/5]">
+                    <img
+                      src={image.url}
+                      alt={image.title || image.caption || "Gallery image"}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-foreground/85 via-foreground/30 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                    <span className="mb-1 text-xs uppercase tracking-wider text-primary-foreground/80">{image.year}</span>
+                    <span className="line-clamp-2 text-sm font-medium text-white sm:text-base">{image.title || image.caption}</span>
+                  </div>
+                </motion.button>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
       <AnimatePresence>
-        {selectedImage !== null && (
+        {selectedImage !== null && galleryImages[selectedImage] && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -88,7 +85,7 @@ export function Gallery() {
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                prevImage()
+                if (selectedImage !== null) setSelectedImage((selectedImage - 1 + galleryImages.length) % galleryImages.length)
               }}
               className="absolute left-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background/20 text-white transition-colors hover:bg-background/30 sm:left-6 sm:h-12 sm:w-12"
             >
@@ -97,7 +94,7 @@ export function Gallery() {
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                nextImage()
+                if (selectedImage !== null) setSelectedImage((selectedImage + 1) % galleryImages.length)
               }}
               className="absolute right-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background/20 text-white transition-colors hover:bg-background/30 sm:right-6 sm:h-12 sm:w-12"
             >
@@ -116,12 +113,12 @@ export function Gallery() {
               <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
                 <img
                   src={galleryImages[selectedImage].url}
-                  alt={galleryImages[selectedImage].caption}
+                  alt={galleryImages[selectedImage].title || galleryImages[selectedImage].caption}
                   className="h-full w-full object-contain"
                 />
               </div>
               <div className="mt-4 space-y-1 text-center">
-                <p className="font-medium text-white">{galleryImages[selectedImage].caption}</p>
+                <p className="font-medium text-white">{galleryImages[selectedImage].title || galleryImages[selectedImage].caption}</p>
                 <p className="text-sm text-white/60">{galleryImages[selectedImage].year}</p>
               </div>
             </motion.div>

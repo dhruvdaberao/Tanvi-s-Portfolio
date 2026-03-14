@@ -21,6 +21,8 @@ const menuItems = [
   { id: "navbar", label: "Navigation & Social", icon: Hash },
   { id: "about", label: "About & Video", icon: User },
   { id: "writings", label: "Featured Writings", icon: BookOpen },
+  { id: "blog", label: "Blog", icon: BookOpen },
+  { id: "publications", label: "Publications", icon: BookOpen },
   { id: "gallery", label: "Gallery", icon: ImageIcon },
   { id: "awards", label: "Awards", icon: AwardIcon },
   { id: "quote", label: "Featured Quote", icon: MessageSquare },
@@ -114,6 +116,30 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
     updateContent("writings", null, content.writings.filter(w => w.id !== id))
   }
 
+  const addBlog = () => {
+    const newItems = [...(content.blog || []), { id: Date.now().toString(), title: "", description: "", image: "", link: "" }]
+    updateContent("blog", null, newItems)
+  }
+  const updateBlog = (id: string, field: string, value: string) => {
+    const newItems = (content.blog || []).map(item => item.id === id ? { ...item, [field]: value } : item)
+    updateContent("blog", null, newItems)
+  }
+  const removeBlog = (id: string) => {
+    updateContent("blog", null, (content.blog || []).filter(item => item.id !== id))
+  }
+
+  const addPublication = () => {
+    const newItems = [...(content.publications || []), { id: Date.now().toString(), title: "", description: "", image: "", link: "" }]
+    updateContent("publications", null, newItems)
+  }
+  const updatePublication = (id: string, field: string, value: string) => {
+    const newItems = (content.publications || []).map(item => item.id === id ? { ...item, [field]: value } : item)
+    updateContent("publications", null, newItems)
+  }
+  const removePublication = (id: string) => {
+    updateContent("publications", null, (content.publications || []).filter(item => item.id !== id))
+  }
+
   const handleDragStart = (e: React.DragEvent, id: string) => {
     e.dataTransfer.setData("imageId", id)
   }
@@ -151,7 +177,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
   }
 
   const addAward = () => {
-    const newItems = [...content.awards.list, { id: Date.now().toString(), title: "", year: "", org: "" }]
+    const newItems = [...content.awards.list, { id: Date.now().toString(), title: "", year: "", org: "", description: "" }]
     updateContent("awards", "list", newItems)
   }
   const updateAward = (id: string, field: string, value: string) => {
@@ -231,7 +257,8 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
       </aside>
 
       {/* Main Content */}
-      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background bg-cover bg-center"
+        style={{ backgroundImage: "linear-gradient(rgba(17, 8, 35, 0.78), rgba(17, 8, 35, 0.82)), url(/banner.jpg)" }}>
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/80 p-3 backdrop-blur-sm sm:p-4 lg:p-6">
           <div className="flex items-center gap-2"><button onClick={() => setSidebarOpen(true)} className="flex h-10 w-10 items-center justify-center rounded-lg border border-border hover:bg-muted lg:hidden"><Menu className="h-5 w-5" /></button><h2 className="font-serif text-lg tracking-tight text-primary sm:text-2xl">
@@ -567,6 +594,58 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
               </div>
             )}
 
+            {activeSection === "blog" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <p className="text-muted-foreground">Manage blog cards.</p>
+                  <button onClick={addBlog} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg font-medium hover:bg-primary hover:text-white transition-all">
+                    <Plus className="w-4 h-4" /> Add Entry
+                  </button>
+                </div>
+                {(content.blog || []).length === 0 ? (
+                  <div className="text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">No blog entries yet.</div>
+                ) : (
+                  <div className="space-y-4">{(content.blog || []).map((item) => (
+                    <div key={item.id} className="bg-card rounded-xl p-4 border border-border space-y-3">
+                      <div className="flex justify-end"><button onClick={() => removeBlog(item.id)} className="text-destructive"><Trash2 className="w-4 h-4" /></button></div>
+                      <input value={item.title} onChange={(e) => updateBlog(item.id, "title", e.target.value)} placeholder="Title" className="w-full px-3 py-2 bg-background border border-border rounded-lg" />
+                      <textarea value={item.description} onChange={(e) => updateBlog(item.id, "description", e.target.value)} placeholder="Description" className="w-full px-3 py-2 bg-background border border-border rounded-lg" rows={3} />
+                      <input value={item.link} onChange={(e) => updateBlog(item.id, "link", e.target.value)} placeholder="Link" className="w-full px-3 py-2 bg-background border border-border rounded-lg" />
+                      <label className="border border-dashed border-border rounded-lg p-4 text-sm text-center cursor-pointer block">Upload image
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (res) => updateBlog(item.id, "image", res))} />
+                      </label>
+                    </div>
+                  ))}</div>
+                )}
+              </div>
+            )}
+
+            {activeSection === "publications" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <p className="text-muted-foreground">Manage publication cards.</p>
+                  <button onClick={addPublication} className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg font-medium hover:bg-primary hover:text-white transition-all">
+                    <Plus className="w-4 h-4" /> Add Entry
+                  </button>
+                </div>
+                {(content.publications || []).length === 0 ? (
+                  <div className="text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">No publications yet.</div>
+                ) : (
+                  <div className="space-y-4">{(content.publications || []).map((item) => (
+                    <div key={item.id} className="bg-card rounded-xl p-4 border border-border space-y-3">
+                      <div className="flex justify-end"><button onClick={() => removePublication(item.id)} className="text-destructive"><Trash2 className="w-4 h-4" /></button></div>
+                      <input value={item.title} onChange={(e) => updatePublication(item.id, "title", e.target.value)} placeholder="Title" className="w-full px-3 py-2 bg-background border border-border rounded-lg" />
+                      <textarea value={item.description} onChange={(e) => updatePublication(item.id, "description", e.target.value)} placeholder="Description" className="w-full px-3 py-2 bg-background border border-border rounded-lg" rows={3} />
+                      <input value={item.link} onChange={(e) => updatePublication(item.id, "link", e.target.value)} placeholder="Link" className="w-full px-3 py-2 bg-background border border-border rounded-lg" />
+                      <label className="border border-dashed border-border rounded-lg p-4 text-sm text-center cursor-pointer block">Upload image
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (res) => updatePublication(item.id, "image", res))} />
+                      </label>
+                    </div>
+                  ))}</div>
+                )}
+              </div>
+            )}
+
             {activeSection === "gallery" && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
@@ -679,6 +758,13 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                           value={award.org}
                           onChange={e => updateAward(award.id, "org", e.target.value)}
                           className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-purple-500"
+                        />
+                        <textarea
+                          placeholder="Description"
+                          value={award.description || ""}
+                          onChange={e => updateAward(award.id, "description", e.target.value)}
+                          className="md:col-span-3 px-3 py-2 bg-background border border-border rounded-lg text-sm focus:ring-2 focus:ring-purple-500"
+                          rows={2}
                         />
                       </div>
                       <button onClick={() => removeAward(award.id)} className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
