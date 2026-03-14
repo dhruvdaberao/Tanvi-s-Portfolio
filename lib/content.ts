@@ -5,7 +5,6 @@ export type FeaturedWriting = { id: string; title: string; image: string; desc: 
 export type LinkCardItem = { id: string; title: string; description: string; image: string; link: string };
 
 export type ContentState = {
-  admin: { pass: string };
   navbar: { about: string; writings: string; blog: string; publications: string; awards: string; gallery: string; contact: string };
   social: { twitter: string; instagram: string; linkedin: string; medium: string; custom: SocialLink[] };
   hero: { badge: string; subtitle: string; quote: string; name: string; profilePhoto: string };
@@ -23,7 +22,6 @@ export type ContentState = {
 };
 
 export const defaultContent: ContentState = {
-  admin: { pass: "" },
   navbar: { about: "About", writings: "Writing", blog: "Blog", publications: "Publications", awards: "Awards", gallery: "Gallery", contact: "Contact" },
   social: { twitter: "", instagram: "", linkedin: "", medium: "", custom: [] },
   hero: { badge: "Award-Winning Author", subtitle: "Writer & Essayist", quote: "Words have the power to change the world.", name: "Tanvi Sirsat", profilePhoto: "" },
