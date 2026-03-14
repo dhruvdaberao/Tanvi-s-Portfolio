@@ -26,7 +26,7 @@ export function AdminModal({ open, onOpenChange }: AdminModalProps) {
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error || "Incorrect password. Please try again.")
+        setError(data.message || data.error || "Incorrect password. Please try again.")
         return
       }
 

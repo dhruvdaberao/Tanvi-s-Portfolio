@@ -65,14 +65,14 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
     })
     const data = await res.json()
     if (!res.ok) {
-      alert(data.error || "Upload failed")
+      alert(data.message || data.error || "Upload failed")
       return
     }
     callback(data.secure_url)
   }
 
   // Newsletter state
-  const [subscribers, setSubscribers] = useState<{id: string, email: string, created_at: string}[]>([])
+  const [subscribers, setSubscribers] = useState<{id: string, email: string, createdAt: string}[]>([])
   const [loadingSubscribers, setLoadingSubscribers] = useState(false)
 
   useEffect(() => {
@@ -87,11 +87,26 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
     }
   }, [activeSection])
 
+
+
+  const sendNewsletter = () => {
+    if (subscribers.length === 0) return
+
+    const bcc = subscribers
+      .map((sub) => sub.email)
+      .filter(Boolean)
+      .join(",")
+
+    const subject = encodeURIComponent("Tanvi Sirsat Newsletter")
+    const mailto = `mailto:?bcc=${encodeURIComponent(bcc)}&subject=${subject}`
+    window.open(mailto, "_blank", "noopener,noreferrer")
+  }
+
   const exportCSV = () => {
     const headers = ["Email", "Date Subscribed"]
     const csvContent = [
       headers.join(","),
-      ...subscribers.map(sub => `${sub.email},${new Date(sub.created_at).toLocaleDateString()}`)
+      ...subscribers.map(sub => `${sub.email},${new Date(sub.createdAt).toLocaleDateString()}`)
     ].join("\n")
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
@@ -206,7 +221,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
 
       {/* Sidebar */}
       <aside
-        className={`hide-scrollbar absolute inset-y-0 left-0 z-30 flex w-[85%] max-w-xs flex-col border-r border-border bg-secondary/90 transition-transform duration-300 lg:relative lg:w-64 lg:max-w-none lg:translate-x-0 ${
+        className={`hide-scrollbar absolute inset-y-0 left-0 z-30 flex w-[85%] max-w-xs flex-col border-r border-border bg-purple-700 text-white transition-transform duration-300 lg:relative lg:w-64 lg:max-w-none lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -236,7 +251,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 activeSection === item.id
                   ? "bg-primary text-primary-foreground font-medium"
-                  : "hover:bg-primary/10 text-muted-foreground hover:text-foreground"
+                  : "hover:bg-white/10 text-purple-100 hover:text-white"
               }`}
             >
               <item.icon className="w-4 h-4" />
@@ -248,7 +263,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
         <div className="p-3 border-t border-border">
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-100 hover:bg-red-500/80 hover:text-white transition-colors"
           >
             <LogOut className="w-4 h-4" />
             Sign Out
@@ -260,7 +275,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
       <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background bg-cover bg-center"
         style={{ backgroundImage: "linear-gradient(rgba(17, 8, 35, 0.78), rgba(17, 8, 35, 0.82)), url(/banner.jpg)" }}>
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/80 p-3 backdrop-blur-sm sm:p-4 lg:p-6">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background p-3 sm:p-4 lg:p-6">
           <div className="flex items-center gap-2"><button onClick={() => setSidebarOpen(true)} className="flex h-10 w-10 items-center justify-center rounded-lg border border-border hover:bg-muted lg:hidden"><Menu className="h-5 w-5" /></button><h2 className="font-serif text-lg tracking-tight text-primary sm:text-2xl">
             {menuItems.find(m => m.id === activeSection)?.label}
           </h2></div>
@@ -522,7 +537,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                     <Plus className="w-4 h-4" /> Add Entry
                   </button>
                 </div>
-                
+
                 <AnimatePresence>
                   {content.writings.length === 0 && (
                     <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-center p-12 border-2 border-dashed border-border rounded-xl">
@@ -950,13 +965,21 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
 
             {activeSection === "newsletter" && (
               <div className="space-y-6">
-                <div className="flex items-center justify-between border-b border-border pb-4">
+                <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h3 className="text-lg font-serif flex items-center gap-2 text-primary">
                       <Users className="w-5 h-5"/> Newsletter Manager
                     </h3>
                     <p className="text-sm text-muted-foreground mt-1">Manage and export your newsletter subscribers.</p>
                   </div>
+                  <div className="flex flex-wrap gap-2">
+                  <button 
+                    onClick={sendNewsletter}
+                    disabled={subscribers.length === 0}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-all disabled:opacity-50"
+                  >
+                    <Mail className="w-4 h-4" /> Send Newsletter
+                  </button>
                   <button 
                     onClick={exportCSV} 
                     disabled={subscribers.length === 0}
@@ -964,8 +987,9 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                   >
                     <Download className="w-4 h-4" /> Export CSV
                   </button>
+                  </div>
                 </div>
-                
+
                 <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
                   <div className="grid grid-cols-2 p-4 border-b border-border bg-muted/50 font-medium text-sm text-muted-foreground">
                     <div>Email Address</div>
@@ -985,7 +1009,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                       {subscribers.map(sub => (
                         <div key={sub.id} className="grid grid-cols-2 p-4 text-sm hover:bg-muted/10 transition-colors">
                           <div className="font-medium">{sub.email}</div>
-                          <div className="text-muted-foreground">{new Date(sub.created_at).toLocaleDateString()}</div>
+                          <div className="text-muted-foreground">{new Date(sub.createdAt).toLocaleDateString()}</div>
                         </div>
                       ))}
                     </div>

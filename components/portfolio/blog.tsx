@@ -13,7 +13,7 @@ export function Blog() {
 
   return (
     <section id="blog" className="py-32 px-6 relative" ref={ref}>
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-6xl px-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -29,7 +29,7 @@ export function Blog() {
         {posts.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-muted-foreground">No content added yet.</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mx-auto">
             {posts.map((post, index) => (
               <motion.article
                 key={post.id}

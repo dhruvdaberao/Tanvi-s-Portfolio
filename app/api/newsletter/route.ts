@@ -10,13 +10,13 @@ export async function POST(request: Request) {
     const body = await request.json();
     const email = sanitizeText(body.email).toLowerCase();
 
-    if (!email) return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    if (!email) return NextResponse.json({ success: false, message: "Email is required" }, { status: 400 });
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
+    if (!emailRegex.test(email)) return NextResponse.json({ success: false, message: "Invalid email address" }, { status: 400 });
 
     const db = await getDb();
     const exists = await db.collection("newsletter_subscribers").findOne({ email });
-    if (exists) return NextResponse.json({ error: "You are already subscribed." }, { status: 409 });
+    if (exists) return NextResponse.json({ success: false, message: "You are already subscribed." }, { status: 409 });
 
     await db.collection("newsletter_subscribers").insertOne({ email, createdAt: new Date() });
 
@@ -30,6 +30,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, message: "Thanks for subscribing!" });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Something went wrong. Please try again." }, { status: 500 });
   }
 }

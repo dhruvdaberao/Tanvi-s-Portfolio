@@ -14,23 +14,31 @@ export async function POST(request: Request) {
     const message = sanitizeText(body.message);
     const honeypot = sanitizeText(body.honeypot);
 
-    if (honeypot) return NextResponse.json({ error: "Spam detected" }, { status: 400 });
-    if (!name || !email || !message) return NextResponse.json({ error: "Name, email, and message are required" }, { status: 400 });
+    if (honeypot) {
+      return NextResponse.json({ success: false, message: "Spam detected" }, { status: 400 });
+    }
+    if (!name || !email || !message) {
+      return NextResponse.json({ success: false, message: "Name, email, and message are required" }, { status: 400 });
+    }
 
     const db = await getDb();
     await db.collection("contact_messages").insertOne({ name, email, inquiryType, message, createdAt: new Date() });
 
     const data = await resend.emails.send({
-      from: "Contact Form <portfolio@tanvisirsat.com>",
+      from: "onboarding@resend.dev",
       to: "dhruvdaberao@gmail.com",
       subject: `New Contact Form Message: ${inquiryType}`,
       text: `Name: ${name}\nEmail: ${email}\nInquiry Type: ${inquiryType}\nMessage: ${message}`,
     });
 
-    if (data.error) return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
+    if (data.error) {
+      console.error("Resend returned an error while sending contact email:", data.error);
+      return NextResponse.json({ success: false, message: "Failed to send email" }, { status: 500 });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    console.error("Unexpected error in /api/contact:", error);
+    return NextResponse.json({ success: false, message: "Failed to send email" }, { status: 500 });
   }
 }

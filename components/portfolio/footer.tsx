@@ -27,7 +27,7 @@ function NewsletterForm() {
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to subscribe")
+        throw new Error(data.message || data.error || "Failed to subscribe")
       }
 
       setStatus("success")
