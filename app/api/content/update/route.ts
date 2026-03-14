@@ -12,9 +12,18 @@ export async function POST(request: NextRequest) {
     const mongoUri = process.env.MONGO_URI;
     const jwtSecret = process.env.JWT_SECRET;
 
-    if (!mongoUri || !jwtSecret) {
+    if (!mongoUri) {
+      console.error("Missing MONGO_URI environment variable");
       return NextResponse.json(
-        { success: false, error: "Server configuration error: missing env variables" },
+        { success: false, error: "Missing database configuration" },
+        { status: 500 }
+      );
+    }
+
+    if (!jwtSecret) {
+      console.error("Missing JWT_SECRET environment variable");
+      return NextResponse.json(
+        { success: false, error: "Missing authentication configuration" },
         { status: 500 }
       );
     }
@@ -78,10 +87,10 @@ export async function POST(request: NextRequest) {
 
     const db = await getDb();
     await db.collection("site_content").updateOne(
-      { key: "global" },
+      { key: "portfolioContent" },
       {
         $set: {
-          key: "global",
+          key: "portfolioContent",
           authorName: content.hero?.name || "",
           heroQuote: content.hero?.quote || "",
           heroSubtitle: content.hero?.subtitle || "",
@@ -106,6 +115,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("CONTENT UPDATE FAILED:", error);
+    console.error("STACK TRACE:", error instanceof Error ? error.stack : undefined);
     return NextResponse.json(
       {
         success: false,
