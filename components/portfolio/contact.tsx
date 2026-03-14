@@ -26,12 +26,18 @@ export function Contact() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
-  const [errorMessage, setErrorMessage] = useState("")
+  const [validationError, setValidationError] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!formState.name || !formState.email || !formState.inquiryType || !formState.message) {
+      setValidationError("Please fill all required fields.")
+      return
+    }
+
     setIsSubmitting(true)
-    setErrorMessage("")
+    setValidationError("")
     
     try {
       const response = await fetch('/api/contact', {
@@ -42,18 +48,14 @@ export function Contact() {
 
       const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.message || data.error || 'Something went wrong. Please try again.')
+      if (!response.ok || !data.success) {
+        return
       }
 
       setSubmitted(true)
       setFormState({ name: "", email: "", inquiryType: "general", message: "", honeypot: "" })
     } catch (error: any) {
       console.error('Contact submit error:', error)
-      const normalizedMessage = (error?.message || "").toLowerCase().includes("failed to send email")
-        ? "Unable to submit message right now. Please try again."
-        : (error?.message || "Unable to submit message right now. Please try again.")
-      setErrorMessage(normalizedMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -186,9 +188,9 @@ export function Contact() {
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {errorMessage && (
-                    <div className="p-4 bg-destructive/10 text-destructive text-sm rounded-lg border border-destructive/20">
-                      {errorMessage}
+                  {validationError && (
+                    <div className="p-4 bg-muted text-foreground text-sm rounded-lg border border-border">
+                      {validationError}
                     </div>
                   )}
                   {/* Honeypot field for spam prevention */}

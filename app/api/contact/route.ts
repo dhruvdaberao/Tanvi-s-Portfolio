@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import { getDb } from "@/lib/db";
 import { sanitizeText } from "@/lib/security";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
   try {
@@ -17,8 +14,12 @@ export async function POST(request: Request) {
     if (honeypot) {
       return NextResponse.json({ success: false, message: "Spam detected" }, { status: 400 });
     }
+
     if (!name || !email || !inquiryType || !message) {
-      return NextResponse.json({ success: false, message: "Name, email, inquiry type, and message are required" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Name, email, inquiry type, and message are required" },
+        { status: 400 },
+      );
     }
 
     const db = await getDb();
@@ -31,28 +32,9 @@ export async function POST(request: Request) {
       status: "new",
     });
 
-    const data = await resend.emails.send({
-      from: "Portfolio Contact <onboarding@resend.dev>",
-      to: "dhruvdaberao@gmail.com",
-      subject: `New Contact Form Message: ${inquiryType}`,
-      html: `
-        <h2>New Contact Message</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Type:</strong> ${inquiryType}</p>
-        <p><strong>Message:</strong></p>
-        <p>${message}</p>
-      `,
-    });
-
-    if (data.error) {
-      console.error("Resend returned an error while sending contact email:", data.error);
-      return NextResponse.json({ success: false, message: "Failed to send email" }, { status: 500 });
-    }
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Unexpected error in /api/contact:", error);
-    return NextResponse.json({ success: false, message: "Failed to send email" }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Failed to save message" }, { status: 500 });
   }
 }
