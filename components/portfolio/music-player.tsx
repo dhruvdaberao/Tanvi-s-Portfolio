@@ -62,7 +62,7 @@ export function MusicPlayer() {
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      <audio ref={audioRef} src={content.music.fileUrl} />
+      <audio ref={audioRef} src={`/api/media/audio?url=${encodeURIComponent(content.music.fileUrl)}`} preload="auto" />
       
       <button
         onClick={() => setIsPlaying(!isPlaying)}

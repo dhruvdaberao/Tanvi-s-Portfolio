@@ -5,7 +5,7 @@ import { useInView } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import { Quote, Play, X, User, Video as VideoIcon, AlertTriangle } from "lucide-react"
 import { useContent } from "@/components/portfolio/content-context"
-import { getVideoType, getEmbedUrl, isValidVideoUrl, getAutoThumbnail, extractYouTubeId, getYouTubeThumbnailFallback } from "@/utils/video"
+import { getVideoType, getEmbedUrl, isValidVideoUrl, getAutoThumbnail, extractYouTubeId, getYouTubeThumbnailCandidates } from "@/utils/video"
 
 export function About() {
   const ref = useRef(null)
@@ -18,6 +18,8 @@ export function About() {
   const embedUrl = getEmbedUrl(content.video.url)
   const isValid = isValidVideoUrl(content.video.url)
   const resolvedThumbnail = getAutoThumbnail(content.video.url, content.video.thumbnail)
+  const youtubeId = extractYouTubeId(content.video.url)
+  const youtubeCandidates = youtubeId ? getYouTubeThumbnailCandidates(youtubeId) : []
   const [thumbnailSrc, setThumbnailSrc] = useState(resolvedThumbnail || "")
 
   useEffect(() => {
@@ -96,11 +98,18 @@ export function About() {
                       alt="Video Thumbnail"
                       className="absolute w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       onError={() => {
-                        const youtubeId = extractYouTubeId(content.video.url)
-                        if (youtubeId && thumbnailSrc.includes("maxresdefault")) {
-                          setThumbnailSrc(getYouTubeThumbnailFallback(youtubeId))
+                        if (!youtubeCandidates.length) {
+                          setThumbnailSrc("")
                           return
                         }
+
+                        const currentIndex = youtubeCandidates.indexOf(thumbnailSrc)
+                        const nextThumbnail = youtubeCandidates[currentIndex + 1]
+                        if (nextThumbnail) {
+                          setThumbnailSrc(nextThumbnail)
+                          return
+                        }
+
                         setThumbnailSrc("")
                       }}
                     />
