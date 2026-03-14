@@ -31,7 +31,7 @@ export default function GalleryPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {pagedItems.map((image) => (
-              <article key={image.id} className="rounded-xl border border-border bg-card p-3">
+              <article key={image.id} className="rounded-xl border border-border bg-card p-3 shadow-md transition-shadow duration-200 hover:shadow-lg">
                 <div className="relative aspect-[4/5] overflow-hidden rounded-lg">
                   <Image src={image.url} alt={image.title || image.caption || "Gallery image"} fill unoptimized className="object-cover" />
                 </div>

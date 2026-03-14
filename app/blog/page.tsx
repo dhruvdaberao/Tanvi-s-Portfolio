@@ -39,7 +39,7 @@ export default function BlogListingPage() {
               const createdAt = post.createdAt ? new Date(post.createdAt).toLocaleDateString() : ""
 
               return (
-                <article key={post.id} className="rounded-2xl border border-border bg-card p-5">
+                <article key={post.id} className="rounded-2xl border border-border bg-card p-5 shadow-md transition-shadow duration-200 hover:shadow-lg">
                   {post.coverImage ? (
                     <div className="mb-5 aspect-[3/2] w-full rounded-lg overflow-hidden relative">
                       <Image src={post.coverImage} alt={post.title || "Blog cover"} fill unoptimized className="object-cover" />

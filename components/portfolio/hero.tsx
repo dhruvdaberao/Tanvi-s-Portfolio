@@ -9,19 +9,11 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-[calc(100svh-4rem)] items-center overflow-hidden px-4 pt-10 pb-20 sm:px-6 md:pt-16"
+      className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4 pt-16 pb-20 sm:px-6 md:pt-20"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[58%] opacity-[0.08]"
-        style={{
-          backgroundImage:
-            "linear-gradient(45deg, rgba(147, 51, 234, 0.8) 25%, transparent 25%), linear-gradient(-45deg, rgba(147, 51, 234, 0.8) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(147, 51, 234, 0.8) 75%), linear-gradient(-45deg, transparent 75%, rgba(147, 51, 234, 0.8) 75%)",
-          backgroundSize: "40px 40px",
-          backgroundPosition: "0 0, 0 20px, 20px -20px, -20px 0px",
-          maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0))",
-          WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0))",
-        }}
+        className="hero-pattern pointer-events-none"
       />
 
       <motion.div
@@ -124,11 +116,11 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 1.2 }}
-        className="absolute bottom-4 left-1/2 z-10 hidden -translate-x-1/2 sm:block lg:bottom-6"
+        className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2"
       >
         <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="flex flex-col items-center gap-2">
           <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">Explore</span>
-          <div className="flex h-8 w-5 items-start justify-center rounded-full border-2 border-primary/30 p-1">
+          <div className="flex h-10 w-6 items-start justify-center rounded-full border-2 border-primary/30 p-1">
             <motion.div animate={{ y: [0, 10, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }} className="h-1 w-1 rounded-full bg-primary" />
           </div>
         </motion.div>

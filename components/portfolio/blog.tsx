@@ -39,7 +39,7 @@ export function Blog() {
         </motion.div>
 
         {posts.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-muted-foreground">No published articles yet.</div>
+          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-muted-foreground shadow-md">No published articles yet.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mx-auto">
             {posts.slice(0, 3).map((post, index) => (
@@ -48,7 +48,7 @@ export function Blog() {
                 initial={{ opacity: 0, y: 40 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.8, delay: index * 0.08 }}
-                className="group"
+                className="group rounded-2xl border border-border bg-card p-5 shadow-md transition-shadow duration-200 hover:shadow-lg"
               >
                 <Link href={`/blog/${post.slug}`} className="block">
                   <div className="relative aspect-[3/2] overflow-hidden rounded-lg bg-muted mb-5">

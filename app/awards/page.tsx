@@ -31,7 +31,7 @@ export default function AwardsPage() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {pagedItems.map((item) => (
-              <article key={item.id} className="rounded-2xl border border-border bg-card p-6">
+              <article key={item.id} className="rounded-2xl border border-border bg-card p-6 shadow-md transition-shadow duration-200 hover:shadow-lg">
                 <Award className="h-8 w-8 text-primary" />
                 <h2 className="mt-3 font-serif text-2xl">{item.title}</h2>
                 <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">{item.year} · {item.org}</p>

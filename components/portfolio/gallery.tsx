@@ -33,7 +33,7 @@ export function Gallery() {
         </motion.div>
 
         {galleryImages.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-muted-foreground">
+          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-muted-foreground shadow-md">
             No content added yet.
           </div>
         ) : (

@@ -357,7 +357,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-black/35 p-2 text-white shadow-sm backdrop-blur-md transition-colors hover:bg-black/45 lg:hidden"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500 p-2 text-white shadow-md transition-colors hover:bg-purple-600 lg:hidden"
               >
                 <Menu className="h-5 w-5" />
               </button>
@@ -638,7 +638,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="bg-card rounded-xl p-6 border border-border shadow-sm flex flex-col md:flex-row gap-6 relative group"
+                      className="bg-card rounded-xl border border-border p-6 shadow-md transition-shadow duration-200 hover:shadow-lg flex flex-col md:flex-row gap-6 relative group"
                     >
                       <button onClick={() => removeWriting(writing.id)} className="absolute -top-3 -right-3 w-8 h-8 bg-destructive text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
                         <Trash2 className="w-4 h-4" />
@@ -712,7 +712,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                   <div className="text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">No publications yet.</div>
                 ) : (
                   <div className="space-y-4">{(content.publications || []).map((item) => (
-                    <div key={item.id} className="bg-card rounded-xl p-4 border border-border space-y-3">
+                    <div key={item.id} className="bg-card rounded-xl border border-border p-4 shadow-md transition-shadow duration-200 hover:shadow-lg space-y-3">
                       <div className="flex justify-end"><button onClick={() => removePublication(item.id)} className="text-destructive"><Trash2 className="w-4 h-4" /></button></div>
                       <input value={item.title} onChange={(e) => updatePublication(item.id, "title", e.target.value)} placeholder="Title" className="w-full px-3 py-2 bg-background border border-border rounded-lg" />
                       <textarea value={item.description} onChange={(e) => updatePublication(item.id, "description", e.target.value)} placeholder="Description" className="w-full px-3 py-2 bg-background border border-border rounded-lg" rows={3} />
@@ -753,7 +753,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                       onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, img.id)}
                       onDrop={(e) => handleDrop(e as unknown as React.DragEvent, img.id)}
                       onDragOver={handleDragOver}
-                      className="bg-card rounded-xl border border-border shadow-sm overflow-hidden relative group cursor-grab active:cursor-grabbing"
+                      className="bg-card rounded-xl border border-border shadow-md transition-shadow duration-200 hover:shadow-lg overflow-hidden relative group cursor-grab active:cursor-grabbing"
                     >
                       <div className="absolute top-2 left-2 z-10 w-8 h-8 bg-black/40 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm cursor-grab">
                         <GripVertical className="w-4 h-4" />
@@ -789,7 +789,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
 
             {activeSection === "awards" && (
               <div className="space-y-8">
-                <div className="bg-card p-6 rounded-xl border border-border shadow-sm flex items-center justify-between">
+                <div className="bg-card rounded-xl border border-border p-6 shadow-md transition-shadow duration-200 hover:shadow-lg flex items-center justify-between">
                    <div>
                       <h4 className="font-medium">Total Awards Count</h4>
                       <p className="text-sm text-muted-foreground">Used for the floating hero badge "X+ Awards"</p>
@@ -816,7 +816,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                      <div className="text-center p-8 border border-dashed border-border rounded-xl text-muted-foreground text-sm">No awards added.</div>
                   )}
                   {content.awards.list.map((award) => (
-                    <div key={award.id} className="bg-card rounded-xl p-4 border border-border flex items-center gap-4 relative">
+                    <div key={award.id} className="bg-card rounded-xl border border-border p-4 shadow-md transition-shadow duration-200 hover:shadow-lg flex items-center gap-4 relative">
                       <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
                         <input
                           type="text"
@@ -952,7 +952,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                           </label>
                        </div>
                        
-                       <div className="grid grid-cols-2 gap-6 p-6 bg-card rounded-xl border border-border">
+                       <div className="grid grid-cols-2 gap-6 rounded-xl border border-border bg-card p-6 shadow-md">
                           <div>
                              <label className="block text-sm font-medium mb-4 flex justify-between">
                                 <span>Default Volume</span>
@@ -977,7 +977,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
 
             {activeSection === "settings" && (
               <div className="space-y-8">
-                <div className="bg-card border border-border p-6 rounded-xl shadow-sm">
+                <div className="bg-card rounded-xl border border-border p-6 shadow-md">
                   <h3 className="font-serif text-lg mb-2 text-primary">Global Visibility Toggles</h3>
                   <p className="text-muted-foreground text-sm mb-6">
                     Turn entire website sections ON or OFF instantly. The navigation bar will automatically update.
@@ -1035,7 +1035,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                   </div>
                 </div>
 
-                <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+                <div className="bg-card rounded-xl border border-border shadow-md overflow-hidden">
                   <div className="grid grid-cols-2 p-4 border-b border-border bg-muted/50 font-medium text-sm text-muted-foreground">
                     <div>Email Address</div>
                     <div>Date Subscribed</div>
@@ -1093,15 +1093,15 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <div className="space-y-3">
                     {loadingMessages ? (
-                      <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">Loading messages...</div>
+                      <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground shadow-md">Loading messages...</div>
                     ) : messages.length === 0 ? (
-                      <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">No messages received yet.</div>
+                      <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground shadow-md">No messages received yet.</div>
                     ) : (
                       messages.map((message) => (
                         <button
                           key={message.id}
                           onClick={() => setSelectedMessage(message)}
-                          className={`w-full rounded-xl border bg-card p-4 text-left transition-colors hover:bg-muted/20 ${selectedMessage?.id === message.id ? "border-primary" : "border-border"}`}
+                          className={`w-full rounded-xl border bg-card p-4 text-left shadow-md transition-shadow duration-200 hover:bg-muted/20 hover:shadow-lg ${selectedMessage?.id === message.id ? "border-primary" : "border-border"}`}
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div>
@@ -1117,7 +1117,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                     )}
                   </div>
 
-                  <div className="rounded-xl border border-border bg-card p-5">
+                  <div className="rounded-xl border border-border bg-card p-5 shadow-md">
                     {selectedMessage ? (
                       <div className="space-y-4">
                         <div>

@@ -27,7 +27,7 @@ export function Publications() {
         </motion.div>
 
         {publications.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-muted-foreground">No content added yet.</div>
+          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-muted-foreground shadow-md">No content added yet.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mx-auto">
             {publications.slice(0, 3).map((item, index) => (
@@ -36,7 +36,7 @@ export function Publications() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: index * 0.08 }}
-                className="rounded-2xl border border-border bg-card p-6"
+                className="rounded-2xl border border-border bg-card p-6 shadow-md transition-shadow duration-200 hover:shadow-lg"
               >
                 {item.image ? (
                   <div className="mb-4 aspect-[4/3] w-full rounded-lg overflow-hidden relative">
