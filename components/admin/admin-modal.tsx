@@ -53,6 +53,14 @@ export function AdminModal({ open, onOpenChange }: AdminModalProps) {
 
   if (!open) return null
 
+  if (isAuthenticated) {
+    return (
+      <div className="fixed inset-0 z-50 bg-background">
+        <AdminDashboard onClose={handleClose} onLogout={handleLogout} />
+      </div>
+    )
+  }
+
   return (
     <AnimatePresence>
       <motion.div
@@ -67,15 +75,10 @@ export function AdminModal({ open, onOpenChange }: AdminModalProps) {
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className={`bg-background rounded-2xl shadow-2xl border border-border overflow-hidden ${
-            isAuthenticated ? "w-full max-w-6xl max-h-[90vh]" : "w-full max-w-md"
-          }`}
+          className="w-full max-w-md overflow-hidden rounded-2xl border border-border bg-background shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          {isAuthenticated ? (
-            <AdminDashboard onClose={handleClose} onLogout={handleLogout} />
-          ) : (
-            <div className="p-8">
+          <div className="p-8">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -134,7 +137,6 @@ export function AdminModal({ open, onOpenChange }: AdminModalProps) {
                 </button>
               </form>
             </div>
-          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>

@@ -276,8 +276,10 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
     updateContent("awards", "list", content.awards.list.filter(a => a.id !== id))
   }
 
+  const activeSectionLabel = menuItems.find((item) => item.id === activeSection)?.label || "Dashboard"
+
   return (
-    <div className="relative flex h-[80vh] min-h-[540px] overflow-hidden">
+    <div className="flex min-h-screen bg-muted/30 text-foreground">
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -285,7 +287,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-20 bg-black/40 lg:hidden"
+            className="fixed inset-0 z-30 bg-black/45 md:hidden"
             onClick={() => setSidebarOpen(false)}
             aria-label="Close sidebar overlay"
           />
@@ -294,22 +296,22 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
 
       {/* Sidebar */}
       <aside
-        className={`hide-scrollbar absolute inset-y-0 left-0 z-30 flex w-[85%] max-w-xs flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-transform duration-300 lg:relative lg:w-64 lg:max-w-none lg:translate-x-0 ${
+        className={`hide-scrollbar fixed inset-y-0 left-0 z-40 flex w-[85%] max-w-xs flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-transform duration-300 md:sticky md:top-0 md:z-20 md:h-screen md:w-[220px] md:max-w-none md:translate-x-0 lg:w-[260px] ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="border-b border-sidebar-border p-4">
+        <div className="border-b border-sidebar-border px-4 py-5">
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-black/35 p-2 text-white shadow-sm backdrop-blur-md transition-colors hover:bg-black/45"
+              className="flex items-center gap-2 rounded-lg border border-white/25 bg-black/30 px-3 py-2 text-sm text-white transition-colors hover:bg-black/40"
             >
               <ArrowLeft className="h-4 w-4" />
+              <span>Back to Site</span>
             </button>
-            <span className="text-lg font-medium text-white">Edit Dashboard</span>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="ml-auto flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-white/15 lg:hidden"
+              className="ml-auto flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-white/15 md:hidden"
             >
               <X className="h-4 w-4" />
             </button>
@@ -345,24 +347,41 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
       </aside>
 
       {/* Main Content */}
-      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background">
+      <div className="relative flex min-w-0 flex-1 flex-col bg-background">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background p-3 sm:p-4 lg:p-6">
-          <div className="flex items-center gap-2"><button onClick={() => setSidebarOpen(true)} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-black/35 p-2 text-white shadow-sm backdrop-blur-md transition-colors hover:bg-black/45 lg:hidden"><Menu className="h-5 w-5" /></button><h2 className="font-serif text-lg tracking-tight text-primary sm:text-2xl">
-            {menuItems.find(m => m.id === activeSection)?.label}
-          </h2></div>
+        <div className="sticky top-0 z-10 border-b border-border bg-background/95 px-4 py-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:px-8 lg:px-10">
+          <div className="mx-auto flex w-full max-w-[1100px] items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-muted md:hidden"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+              <h2 className="font-serif text-xl tracking-tight text-primary sm:text-2xl">
+                {activeSectionLabel}
+              </h2>
+            </div>
+          </div>
+        </div>
+
+        <div className="sticky top-5 z-20 hidden justify-end px-4 py-4 sm:px-8 lg:flex lg:px-10">
+          <div className="w-full max-w-[1100px]">
+            <div className="flex justify-end">
           <button
             onClick={handleSave}
-            className="flex shrink-0 items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-md transition-all hover:bg-primary/90 active:scale-95 sm:px-4 sm:py-2.5"
+            className="flex shrink-0 items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-md transition-all hover:bg-primary/90 active:scale-95"
           >
             <Save className="w-4 h-4" />
             Save Changes
           </button>
+            </div>
+          </div>
         </div>
 
         {/* Content Area */}
-        <div className="hide-scrollbar flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
-          <div className="max-w-3xl mx-auto space-y-8 pb-12">
+        <div className="hide-scrollbar flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8 lg:px-10">
+          <div className="mx-auto max-w-[1100px] space-y-8 pb-28 lg:pb-12">
             
             {activeSection === "hero" && (
               <div className="space-y-6">
@@ -1156,6 +1175,16 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-4 backdrop-blur md:hidden">
+        <button
+          onClick={handleSave}
+          className="mx-auto flex w-full max-w-[1100px] items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-md transition-all hover:bg-primary/90 active:scale-[0.99]"
+        >
+          <Save className="h-4 w-4" />
+          Save Changes
+        </button>
       </div>
 
       <AnimatePresence>
