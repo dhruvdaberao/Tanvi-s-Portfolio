@@ -39,3 +39,7 @@ export async function getDb(): Promise<Db> {
   const mongoClient = await getClientPromise();
   return mongoClient.db();
 }
+
+export async function connectDB(): Promise<void> {
+  await getClientPromise();
+}

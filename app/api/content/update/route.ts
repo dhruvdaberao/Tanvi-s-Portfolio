@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
+import { connectDB, getDb } from "@/lib/db";
 import { extractYouTubeId } from "@/utils/video";
 import { verifyAdminToken } from "@/lib/security";
 
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
     if (!mongoUri || !jwtSecret) {
       return NextResponse.json(
-        { success: false, error: "Missing environment variables" },
+        { success: false, error: "Server configuration error: missing env variables" },
         { status: 500 }
       );
     }
@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
     console.log("Received update request");
 
     const incomingContent =
-      typeof body === "object" && body !== null && "content" in body
-        ? (body as { content?: unknown }).content
+      typeof body === "object" && body !== null
+        ? ((body as { content?: unknown }).content ?? body)
         : null;
 
     if (!incomingContent || typeof incomingContent !== "object") {
@@ -65,6 +65,16 @@ export async function POST(request: NextRequest) {
 
     const resolvedThumbnail = content.video?.thumbnail || autoThumb;
     content.video.thumbnail = resolvedThumbnail;
+
+    try {
+      await connectDB();
+    } catch (error) {
+      console.error("MongoDB connection failed:", error);
+      return NextResponse.json(
+        { success: false, error: "Database connection failed" },
+        { status: 500 }
+      );
+    }
 
     const db = await getDb();
     await db.collection("site_content").updateOne(
@@ -93,10 +103,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      content,
     });
   } catch (error) {
-    console.error("Content update failed:", error);
+    console.error("CONTENT UPDATE FAILED:", error);
     return NextResponse.json(
       {
         success: false,
