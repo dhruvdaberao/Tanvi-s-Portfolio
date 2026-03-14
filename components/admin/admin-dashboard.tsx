@@ -358,7 +358,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500 p-2 text-white shadow-md transition-colors hover:bg-purple-600 lg:hidden"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-500 p-2 text-white shadow-md transition-colors hover:bg-purple-600 lg:hidden"
               >
                 <Menu className="h-5 w-5" />
               </button>
@@ -1037,9 +1037,9 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                 </div>
 
                 <div className="bg-card rounded-xl border border-border shadow-md overflow-hidden">
-                  <div className="grid grid-cols-2 p-4 border-b border-border bg-muted/50 font-medium text-sm text-muted-foreground">
+                  <div className="flex justify-between items-center p-4 border-b border-border bg-muted/50 font-medium text-sm text-muted-foreground">
                     <div>Email Address</div>
-                    <div>Date Subscribed</div>
+                    <div className="hidden sm:block">Date Subscribed</div>
                   </div>
                   {loadingSubscribers ? (
                     <div className="p-12 text-center text-muted-foreground flex justify-center items-center gap-3">
@@ -1053,9 +1053,9 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                   ) : (
                     <div className="divide-y divide-border">
                       {subscribers.map(sub => (
-                        <div key={sub.id} className="grid grid-cols-2 p-4 text-sm hover:bg-muted/10 transition-colors">
-                          <div className="font-medium">{sub.email}</div>
-                          <div className="text-muted-foreground">{new Date(sub.createdAt).toLocaleDateString()}</div>
+                        <div key={sub.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 text-sm hover:bg-muted/10 transition-colors gap-1 sm:gap-4">
+                          <div className="font-medium break-all">{sub.email}</div>
+                          <div className="text-muted-foreground text-xs sm:text-sm">{new Date(sub.createdAt).toLocaleDateString()}</div>
                         </div>
                       ))}
                     </div>
