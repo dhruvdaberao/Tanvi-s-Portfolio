@@ -52,12 +52,12 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
       throw new Error(contentData?.error || contentData?.message || "Failed to save content")
     }
 
-    const videoThumbnail = content.video.thumbnail || ""
+    const videoThumbnail = content.video?.thumbnail || ""
     const videoRes = await fetch("/api/video/update", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({
-        videoUrl: content.video.url || "",
+        videoUrl: content.video?.url || "",
         videoThumbnail,
       }),
     })
