@@ -1,11 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { connectDB, getDb } from "@/lib/db";
+import { NextRequest } from "next/server";
+import { connectDB } from "@/lib/db";
 import { extractYouTubeId } from "@/utils/video";
 import { verifyAdminToken } from "@/lib/security";
 
-function unauthorized() {
-  return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +11,7 @@ export async function POST(request: NextRequest) {
 
     if (!mongoUri) {
       console.error("Missing MONGO_URI environment variable");
-      return NextResponse.json(
+      return Response.json(
         { success: false, error: "Missing database configuration" },
         { status: 500 }
       );
@@ -22,19 +19,29 @@ export async function POST(request: NextRequest) {
 
     if (!jwtSecret) {
       console.error("Missing JWT_SECRET environment variable");
-      return NextResponse.json(
+      return Response.json(
         { success: false, error: "Missing authentication configuration" },
         { status: 500 }
       );
     }
 
-    const auth = request.headers.get("authorization") || "";
-    const token = auth.replace("Bearer ", "").trim();
-    if (!token || !verifyAdminToken(token)) return unauthorized();
+    const authHeader = request.headers.get("authorization")
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return Response.json(
+        { success: false, error: "Missing authentication token" },
+        { status: 401 }
+      )
+    }
+
+    const token = authHeader.split(" ")[1]
+    if (!token || !verifyAdminToken(token)) {
+      return Response.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    }
 
     const contentType = request.headers.get("content-type") || "";
     if (!contentType.toLowerCase().includes("application/json")) {
-      return NextResponse.json(
+      return Response.json(
         { success: false, error: "Content-Type must be application/json" },
         { status: 400 }
       );
@@ -44,7 +51,7 @@ export async function POST(request: NextRequest) {
     try {
       body = await request.json();
     } catch {
-      return NextResponse.json({ success: false, error: "Invalid JSON payload" }, { status: 400 });
+      return Response.json({ success: false, error: "Invalid JSON body" }, { status: 400 });
     }
 
     console.log("Received update request");
@@ -55,7 +62,7 @@ export async function POST(request: NextRequest) {
         : null;
 
     if (!incomingContent || typeof incomingContent !== "object") {
-      return NextResponse.json({ success: false, error: "Invalid payload" }, { status: 400 });
+      return Response.json({ success: false, error: "Invalid payload" }, { status: 400 });
     }
 
     const { admin: _legacyAdmin, ...sanitizedIncomingContent } = incomingContent as Record<string, any>;
@@ -75,18 +82,10 @@ export async function POST(request: NextRequest) {
     const resolvedThumbnail = content.video?.thumbnail || autoThumb;
     content.video.thumbnail = resolvedThumbnail;
 
-    try {
-      await connectDB();
-    } catch (error) {
-      console.error("MongoDB connection failed:", error);
-      return NextResponse.json(
-        { success: false, error: "Database connection failed" },
-        { status: 500 }
-      );
-    }
+    const client = await connectDB()
+    const db = client.db()
 
-    const db = await getDb();
-    await db.collection("site_content").updateOne(
+    await db.collection("content").updateOne(
       { key: "portfolioContent" },
       {
         $set: {
@@ -110,13 +109,13 @@ export async function POST(request: NextRequest) {
       { upsert: true }
     );
 
-    return NextResponse.json({
+    return Response.json({
       success: true,
     });
   } catch (error) {
-    console.error("CONTENT UPDATE FAILED:", error);
-    console.error("STACK TRACE:", error instanceof Error ? error.stack : undefined);
-    return NextResponse.json(
+    console.error("CONTENT UPDATE ERROR:", error)
+    console.error("STACK:", error instanceof Error ? error.stack : undefined)
+    return Response.json(
       {
         success: false,
         error: "Server error while saving content",

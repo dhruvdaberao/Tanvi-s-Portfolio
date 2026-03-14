@@ -10,36 +10,26 @@ function getMongoUri() {
   return uri;
 }
 
-let clientPromise: Promise<MongoClient> | null = null;
+let client: MongoClient;
+let clientPromise: Promise<MongoClient>;
 
 declare global {
   // eslint-disable-next-line no-var
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
-function getClientPromise() {
-  if (process.env.NODE_ENV === "development") {
-    if (!global._mongoClientPromise) {
-      const client = new MongoClient(getMongoUri());
-      global._mongoClientPromise = client.connect();
-    }
-
-    return global._mongoClientPromise;
-  }
-
-  if (!clientPromise) {
-    const client = new MongoClient(getMongoUri());
-    clientPromise = client.connect();
-  }
-
-  return clientPromise;
+if (!global._mongoClientPromise) {
+  client = new MongoClient(getMongoUri());
+  global._mongoClientPromise = client.connect();
 }
 
+clientPromise = global._mongoClientPromise;
+
 export async function getDb(): Promise<Db> {
-  const mongoClient = await getClientPromise();
+  const mongoClient = await connectDB();
   return mongoClient.db();
 }
 
-export async function connectDB(): Promise<void> {
-  await getClientPromise();
+export async function connectDB(): Promise<MongoClient> {
+  return clientPromise;
 }
