@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { ArrowUp, Twitter, Instagram, BookOpen, Heart, Send, Linkedin } from "lucide-react"
 import { useContent } from "./content-context"
+import { VirtualGift } from "./virtual-gift"
 
 function NewsletterForm() {
   const [email, setEmail] = useState("")
@@ -168,6 +169,8 @@ export function Footer() {
               </div>
             )}
           </div>
+
+          <VirtualGift />
 
           <motion.div
             initial={{ opacity: 0 }}
