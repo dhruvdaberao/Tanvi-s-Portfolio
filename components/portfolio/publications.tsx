@@ -3,6 +3,8 @@
 import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
 import { ArrowUpRight } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
 import { useContent } from "@/components/portfolio/content-context"
 
 export function Publications() {
@@ -28,7 +30,7 @@ export function Publications() {
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center text-muted-foreground">No content added yet.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mx-auto">
-            {publications.map((item, index) => (
+            {publications.slice(0, 3).map((item, index) => (
               <motion.article
                 key={item.id}
                 initial={{ opacity: 0, y: 30 }}
@@ -36,14 +38,24 @@ export function Publications() {
                 transition={{ duration: 0.6, delay: index * 0.08 }}
                 className="rounded-2xl border border-border bg-card p-6"
               >
-                {item.image ? <img src={item.image} alt={item.title} className="mb-4 aspect-[4/3] w-full rounded-lg object-cover" /> : null}
+                {item.image ? (
+                  <div className="mb-4 aspect-[4/3] w-full rounded-lg overflow-hidden relative">
+                    <Image src={item.image} alt={item.title} fill unoptimized className="w-full h-full object-cover" />
+                  </div>
+                ) : null}
                 <h3 className="font-serif text-2xl tracking-tight mb-3">{item.title}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{item.description}</p>
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{item.description}</p>
                 <a href={item.link || "#"} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">Visit <ArrowUpRight className="w-4 h-4" /></a>
               </motion.article>
             ))}
           </div>
         )}
+
+        {publications.length > 0 ? (
+          <div className="mt-10 text-center">
+            <Link href="/publications" className="text-sm font-medium text-primary">View All →</Link>
+          </div>
+        ) : null}
       </div>
     </section>
   )
