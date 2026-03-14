@@ -17,18 +17,32 @@ export async function POST(request: Request) {
     if (honeypot) {
       return NextResponse.json({ success: false, message: "Spam detected" }, { status: 400 });
     }
-    if (!name || !email || !message) {
-      return NextResponse.json({ success: false, message: "Name, email, and message are required" }, { status: 400 });
+    if (!name || !email || !inquiryType || !message) {
+      return NextResponse.json({ success: false, message: "Name, email, inquiry type, and message are required" }, { status: 400 });
     }
 
     const db = await getDb();
-    await db.collection("contact_messages").insertOne({ name, email, inquiryType, message, createdAt: new Date() });
+    await db.collection("contact_messages").insertOne({
+      name,
+      email,
+      inquiryType,
+      message,
+      createdAt: new Date(),
+      status: "new",
+    });
 
     const data = await resend.emails.send({
-      from: "onboarding@resend.dev",
+      from: "Portfolio Contact <onboarding@resend.dev>",
       to: "dhruvdaberao@gmail.com",
       subject: `New Contact Form Message: ${inquiryType}`,
-      text: `Name: ${name}\nEmail: ${email}\nInquiry Type: ${inquiryType}\nMessage: ${message}`,
+      html: `
+        <h2>New Contact Message</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Type:</strong> ${inquiryType}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message}</p>
+      `,
     });
 
     if (data.error) {

@@ -8,12 +8,23 @@ import {
   ArrowLeft, Save, LogOut, Home, User, BookOpen, 
   Image as ImageIcon, Award as AwardIcon, MessageSquare,
   Settings, Eye, EyeOff, CheckCircle, Upload, Trash2,
-  Plus, Music, Mail, Key, Hash, Link as LinkIcon, Video, Users, Download, Camera, GripVertical, Menu, X
+  Plus, Music, Mail, Key, Hash, Link as LinkIcon, Video, Users, Download, Camera, GripVertical, Menu, X, Inbox
 } from "lucide-react"
 
 interface AdminDashboardProps {
   onClose: () => void
   onLogout: () => void
+}
+
+
+interface ContactMessage {
+  id: string
+  name: string
+  email: string
+  inquiryType: string
+  message: string
+  createdAt: string
+  status?: string
 }
 
 const menuItems = [
@@ -31,6 +42,7 @@ const menuItems = [
   { id: "settings", label: "Section Visibility", icon: Eye },
   { id: "admin", label: "Admin Access", icon: Key },
   { id: "newsletter", label: "Newsletter Manager", icon: Users },
+  { id: "messages", label: "Messages", icon: Inbox },
 ]
 
 export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
@@ -74,6 +86,9 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
   // Newsletter state
   const [subscribers, setSubscribers] = useState<{id: string, email: string, createdAt: string}[]>([])
   const [loadingSubscribers, setLoadingSubscribers] = useState(false)
+  const [messages, setMessages] = useState<ContactMessage[]>([])
+  const [loadingMessages, setLoadingMessages] = useState(false)
+  const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null)
 
   useEffect(() => {
     if (activeSection === "newsletter") {
@@ -85,8 +100,77 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
         })
         .finally(() => setLoadingSubscribers(false))
     }
+
+    if (activeSection === "messages") {
+      setLoadingMessages(true)
+      fetch("/api/messages/get", { headers: { Authorization: `Bearer ${localStorage.getItem("admin-token") || ""}` } })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setMessages(data.messages || [])
+          }
+        })
+        .finally(() => setLoadingMessages(false))
+    }
   }, [activeSection])
 
+  const handleDeleteMessage = async (messageId: string) => {
+    const token = localStorage.getItem("admin-token") || ""
+    const res = await fetch("/api/messages/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ messageId }),
+    })
+    const data = await res.json()
+    if (!res.ok || !data.success) {
+      alert(data.message || "Failed to delete message")
+      return
+    }
+
+    const remaining = messages.filter((msg) => msg.id !== messageId)
+    setMessages(remaining)
+    if (selectedMessage?.id === messageId) setSelectedMessage(null)
+  }
+
+  const handleClearMessages = async () => {
+    if (!confirm("Delete all messages? This action cannot be undone.")) return
+    const token = localStorage.getItem("admin-token") || ""
+    const res = await fetch("/api/messages/clear", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const data = await res.json()
+    if (!res.ok || !data.success) {
+      alert(data.message || "Failed to clear messages")
+      return
+    }
+
+    setMessages([])
+    setSelectedMessage(null)
+  }
+
+  const exportMessagesCSV = () => {
+    const headers = ["Name", "Email", "InquiryType", "Message", "Date"]
+    const toCell = (value: string) => `"${(value || "").replace(/"/g, '""')}"`
+    const csvContent = [
+      headers.join(","),
+      ...messages.map((message) => [
+        toCell(message.name),
+        toCell(message.email),
+        toCell(message.inquiryType),
+        toCell(message.message),
+        toCell(new Date(message.createdAt).toISOString()),
+      ].join(",")),
+    ].join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `contact_messages_${new Date().toISOString().split('T')[0]}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
 
 
   const sendNewsletter = () => {
@@ -1014,6 +1098,93 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                       ))}
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+
+            {activeSection === "messages" && (
+              <div className="space-y-6">
+                <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h3 className="text-lg font-serif flex items-center gap-2 text-primary">
+                      <Inbox className="w-5 h-5"/> Messages
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">Read, reply, delete, clear, and export contact messages.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={handleClearMessages}
+                      disabled={messages.length === 0}
+                      className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-lg font-medium hover:bg-destructive hover:text-white transition-all disabled:opacity-50"
+                    >
+                      <Trash2 className="w-4 h-4" /> Clear All Messages
+                    </button>
+                    <button
+                      onClick={exportMessagesCSV}
+                      disabled={messages.length === 0}
+                      className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg font-medium hover:bg-primary hover:text-white transition-all disabled:opacity-50"
+                    >
+                      <Download className="w-4 h-4" /> Export Messages
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  <div className="space-y-3">
+                    {loadingMessages ? (
+                      <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">Loading messages...</div>
+                    ) : messages.length === 0 ? (
+                      <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">No messages received yet.</div>
+                    ) : (
+                      messages.map((message) => (
+                        <button
+                          key={message.id}
+                          onClick={() => setSelectedMessage(message)}
+                          className={`w-full rounded-xl border bg-card p-4 text-left transition-colors hover:bg-muted/20 ${selectedMessage?.id === message.id ? "border-primary" : "border-border"}`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="font-medium text-foreground">{message.name}</p>
+                              <p className="text-sm text-muted-foreground break-all">{message.email}</p>
+                            </div>
+                            <span className="text-xs text-muted-foreground">{new Date(message.createdAt).toLocaleDateString()}</span>
+                          </div>
+                          <p className="mt-2 text-xs uppercase tracking-wide text-primary">{message.inquiryType}</p>
+                          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{message.message}</p>
+                        </button>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    {selectedMessage ? (
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="text-lg font-serif text-primary">{selectedMessage.name}</h4>
+                          <p className="text-sm text-muted-foreground break-all">{selectedMessage.email}</p>
+                          <p className="mt-1 text-xs uppercase tracking-wide text-primary">{selectedMessage.inquiryType}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">Received {new Date(selectedMessage.createdAt).toLocaleString()}</p>
+                        </div>
+                        <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">{selectedMessage.message}</p>
+                        <div className="flex flex-wrap gap-2">
+                          <a
+                            href={`mailto:${selectedMessage.email}?subject=${encodeURIComponent("Re: Your message to Tanvi Sirsat")}`}
+                            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                          >
+                            <Mail className="w-4 h-4" /> Reply
+                          </a>
+                          <button
+                            onClick={() => handleDeleteMessage(selectedMessage.id)}
+                            className="inline-flex items-center gap-2 rounded-lg bg-destructive/10 px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive hover:text-white"
+                          >
+                            <Trash2 className="w-4 h-4" /> Delete
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="py-8 text-center text-sm text-muted-foreground">Select a message to view the full details.</div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

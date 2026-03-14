@@ -20,7 +20,7 @@ export function Contact() {
   const [formState, setFormState] = useState({
     name: "",
     email: "",
-    inquiryType: "",
+    inquiryType: "general",
     message: "",
     honeypot: "",
   })
@@ -47,7 +47,7 @@ export function Contact() {
       }
 
       setSubmitted(true)
-      setFormState({ name: "", email: "", inquiryType: "", message: "", honeypot: "" })
+      setFormState({ name: "", email: "", inquiryType: "general", message: "", honeypot: "" })
     } catch (error: any) {
       console.error('Contact submit error:', error)
       setErrorMessage(error.message || 'Something went wrong. Please try again.')
