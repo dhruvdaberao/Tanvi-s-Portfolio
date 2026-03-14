@@ -1,31 +1,41 @@
 import { MongoClient, Db } from "mongodb";
 
-const uri = process.env.MONGO_URI;
+function getMongoUri() {
+  const uri = process.env.MONGO_URI;
 
-if (!uri) {
-  throw new Error("Missing MONGO_URI environment variable");
+  if (!uri) {
+    throw new Error("Missing MONGO_URI environment variable");
+  }
+
+  return uri;
 }
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
+let clientPromise: Promise<MongoClient> | null = null;
 
 declare global {
   // eslint-disable-next-line no-var
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
-if (process.env.NODE_ENV === "development") {
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri);
-    global._mongoClientPromise = client.connect();
+function getClientPromise() {
+  if (process.env.NODE_ENV === "development") {
+    if (!global._mongoClientPromise) {
+      const client = new MongoClient(getMongoUri());
+      global._mongoClientPromise = client.connect();
+    }
+
+    return global._mongoClientPromise;
   }
-  clientPromise = global._mongoClientPromise;
-} else {
-  client = new MongoClient(uri);
-  clientPromise = client.connect();
+
+  if (!clientPromise) {
+    const client = new MongoClient(getMongoUri());
+    clientPromise = client.connect();
+  }
+
+  return clientPromise;
 }
 
 export async function getDb(): Promise<Db> {
-  const mongoClient = await clientPromise;
+  const mongoClient = await getClientPromise();
   return mongoClient.db();
 }

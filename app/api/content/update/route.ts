@@ -4,7 +4,7 @@ import { extractYouTubeId } from "@/utils/video";
 import { verifyAdminToken } from "@/lib/security";
 
 function unauthorized() {
-  return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+  return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 }
 
 export async function POST(request: NextRequest) {
@@ -13,14 +13,34 @@ export async function POST(request: NextRequest) {
     const token = auth.replace("Bearer ", "").trim();
     if (!token || !verifyAdminToken(token)) return unauthorized();
 
-    const body = await request.json();
-    const incomingContent = body?.content;
-    if (!incomingContent || typeof incomingContent !== "object") {
-      return NextResponse.json({ success: false, message: "Invalid payload" }, { status: 400 });
+    const contentType = request.headers.get("content-type") || "";
+    if (!contentType.toLowerCase().includes("application/json")) {
+      return NextResponse.json(
+        { success: false, error: "Content-Type must be application/json" },
+        { status: 400 }
+      );
     }
 
-    const { admin: _legacyAdmin, ...sanitizedIncomingContent } = incomingContent;
-    const content = {
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ success: false, error: "Invalid JSON payload" }, { status: 400 });
+    }
+
+    console.log("Received update request");
+
+    const incomingContent =
+      typeof body === "object" && body !== null && "content" in body
+        ? (body as { content?: unknown }).content
+        : null;
+
+    if (!incomingContent || typeof incomingContent !== "object") {
+      return NextResponse.json({ success: false, error: "Invalid payload" }, { status: 400 });
+    }
+
+    const { admin: _legacyAdmin, ...sanitizedIncomingContent } = incomingContent as Record<string, any>;
+    const content: Record<string, any> = {
       ...sanitizedIncomingContent,
       video: {
         ...(sanitizedIncomingContent.video || {}),
@@ -37,7 +57,7 @@ export async function POST(request: NextRequest) {
     content.video.thumbnail = resolvedThumbnail;
 
     const db = await getDb();
-    const result = await db.collection("site_content").updateOne(
+    await db.collection("site_content").updateOne(
       { key: "global" },
       {
         $set: {
@@ -63,13 +83,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      matchedCount: result.matchedCount,
-      modifiedCount: result.modifiedCount,
-      upsertedId: result.upsertedId,
       content,
     });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ success: false, message: "Failed to update content" }, { status: 500 });
+    console.error("Content update failed:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Server error while saving content",
+      },
+      { status: 500 }
+    );
   }
 }
