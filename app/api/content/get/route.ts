@@ -17,17 +17,18 @@ export async function GET() {
     ]);
 
     const savedContent = siteContent?.content || {};
+    const { admin: _legacyAdmin, ...savedContentWithoutAdmin } = savedContent;
     const fallbackVideoUrl =
-      videoSection?.videoUrl || siteContent?.videoIntroUrl || savedContent.video?.url || "";
+      videoSection?.videoUrl || siteContent?.videoIntroUrl || savedContentWithoutAdmin.video?.url || "";
     const fallbackVideoThumbnail =
-      videoSection?.videoThumbnail || siteContent?.videoThumbnail || savedContent.video?.thumbnail || "";
+      videoSection?.videoThumbnail || siteContent?.videoThumbnail || savedContentWithoutAdmin.video?.thumbnail || "";
 
     const content = {
       ...defaultContent,
-      ...savedContent,
+      ...savedContentWithoutAdmin,
       video: {
         ...defaultContent.video,
-        ...(savedContent.video || {}),
+        ...(savedContentWithoutAdmin.video || {}),
         url: fallbackVideoUrl,
         thumbnail: fallbackVideoThumbnail,
       },

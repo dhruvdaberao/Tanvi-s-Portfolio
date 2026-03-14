@@ -9,7 +9,7 @@ import {
   ArrowLeft, Save, LogOut, Home, User, BookOpen, 
   Image as ImageIcon, Award as AwardIcon, MessageSquare,
   Settings, Eye, EyeOff, CheckCircle, Upload, Trash2,
-  Plus, Music, Mail, Key, Hash, Link as LinkIcon, Video, Users, Download, Camera, GripVertical, Menu, X, Inbox
+  Plus, Music, Mail, Hash, Link as LinkIcon, Video, Users, Download, Camera, GripVertical, Menu, X, Inbox
 } from "lucide-react"
 
 interface AdminDashboardProps {
@@ -41,7 +41,6 @@ const menuItems = [
   { id: "contact", label: "Contact Info", icon: Mail },
   { id: "music", label: "Background Music", icon: Music },
   { id: "settings", label: "Section Visibility", icon: Eye },
-  { id: "admin", label: "Admin Access", icon: Key },
   { id: "newsletter", label: "Newsletter Manager", icon: Users },
   { id: "messages", label: "Messages", icon: Inbox },
 ]
@@ -1006,26 +1005,6 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
                     ))}
                   </div>
                 </div>
-              </div>
-            )}
-
-            {activeSection === "admin" && (
-              <div className="space-y-6">
-                 <div>
-                    <h3 className="text-lg font-serif mb-4 flex items-center gap-2 text-primary border-b border-border pb-2"><Key className="w-5 h-5"/> Access Credentials</h3>
-                    <div className="max-w-md bg-card p-6 border border-border rounded-xl">
-                       <label className="block text-sm font-medium mb-3">Admin Dashboard Password</label>
-                       <input 
-                          type="text" 
-                          value={content.admin.pass} 
-                          onChange={e => updateContent("admin", "pass", e.target.value)}
-                          className="w-full px-4 py-3 border border-border bg-background rounded-lg focus:ring-2 focus:ring-purple-500"
-                       />
-                       <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-                          This is the password used to bypass the double-click lock on the main website. Ensure it is strong.
-                       </p>
-                    </div>
-                 </div>
               </div>
             )}
 

@@ -19,10 +19,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: "Invalid payload" }, { status: 400 });
     }
 
+    const { admin: _legacyAdmin, ...sanitizedIncomingContent } = incomingContent;
     const content = {
-      ...incomingContent,
+      ...sanitizedIncomingContent,
       video: {
-        ...(incomingContent.video || {}),
+        ...(sanitizedIncomingContent.video || {}),
       },
     };
 
@@ -52,6 +53,9 @@ export async function POST(request: NextRequest) {
           backgroundMusicUrl: content.music?.fileUrl || "",
           content,
           updatedAt: new Date(),
+        },
+        $unset: {
+          "content.admin": "",
         },
       },
       { upsert: true }
