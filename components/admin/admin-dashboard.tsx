@@ -313,7 +313,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-black/35 p-2 text-white backdrop-blur-md transition-colors hover:bg-black/45"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-black/35 p-2 text-white shadow-sm backdrop-blur-md transition-colors hover:bg-black/45"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
@@ -359,7 +359,7 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
       <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background">
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background p-3 sm:p-4 lg:p-6">
-          <div className="flex items-center gap-2"><button onClick={() => setSidebarOpen(true)} className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-black/35 p-2 text-white backdrop-blur-md hover:bg-black/45 lg:hidden"><Menu className="h-5 w-5" /></button><h2 className="font-serif text-lg tracking-tight text-primary sm:text-2xl">
+          <div className="flex items-center gap-2"><button onClick={() => setSidebarOpen(true)} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-black/35 p-2 text-white shadow-sm backdrop-blur-md transition-colors hover:bg-black/45 lg:hidden"><Menu className="h-5 w-5" /></button><h2 className="font-serif text-lg tracking-tight text-primary sm:text-2xl">
             {menuItems.find(m => m.id === activeSection)?.label}
           </h2></div>
           <button

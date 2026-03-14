@@ -50,8 +50,10 @@ export function Contact() {
       setFormState({ name: "", email: "", inquiryType: "general", message: "", honeypot: "" })
     } catch (error: any) {
       console.error('Contact submit error:', error)
-      const message = error?.message === "Failed to send email" ? "Unable to submit message right now. Please try again." : (error?.message || "Unable to submit message right now. Please try again.")
-      setErrorMessage(message)
+      const normalizedMessage = (error?.message || "").toLowerCase().includes("failed to send email")
+        ? "Unable to submit message right now. Please try again."
+        : (error?.message || "Unable to submit message right now. Please try again.")
+      setErrorMessage(normalizedMessage)
     } finally {
       setIsSubmitting(false)
     }
