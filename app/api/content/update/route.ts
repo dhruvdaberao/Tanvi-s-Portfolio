@@ -9,6 +9,16 @@ function unauthorized() {
 
 export async function POST(request: NextRequest) {
   try {
+    const mongoUri = process.env.MONGO_URI;
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!mongoUri || !jwtSecret) {
+      return NextResponse.json(
+        { success: false, error: "Missing environment variables" },
+        { status: 500 }
+      );
+    }
+
     const auth = request.headers.get("authorization") || "";
     const token = auth.replace("Bearer ", "").trim();
     if (!token || !verifyAdminToken(token)) return unauthorized();
