@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     content.video.thumbnail = resolvedThumbnail;
 
     const client = await connectDB()
-    const db = client.db()
+    const db = client.db(process.env.DB_NAME)
 
     await db.collection("content").updateOne(
       { key: "portfolioContent" },
