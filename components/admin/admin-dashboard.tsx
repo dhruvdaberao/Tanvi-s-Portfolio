@@ -48,6 +48,7 @@ const menuItems = [
 export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
   const [activeSection, setActiveSection] = useState("hero")
   const [showSaveMessage, setShowSaveMessage] = useState(false)
+  const [showAudioMessage, setShowAudioMessage] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { content, updateContent, saveContent } = useContent()
 
@@ -59,6 +60,17 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to save changes"
       alert(message)
+    }
+  }
+
+  const getFilenameFromUrl = (url: string) => {
+    if (!url) return ""
+    try {
+      const parts = url.split('/')
+      const lastPart = parts[parts.length - 1]
+      return decodeURIComponent(lastPart)
+    } catch (e) {
+      return "Audio file"
     }
   }
 
@@ -943,13 +955,13 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
 
                  {content.music.enabled && (
                     <motion.div initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} className="space-y-6">
-                       <div>
+                        <div>
                           <label className="block text-sm font-medium mb-3">Upload Audio Track (MP3/WAV)</label>
                           <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-8 hover:bg-muted/50 transition-colors cursor-pointer">
-                             <input type="file" accept="audio/*" className="hidden" onChange={(e) => handleFileUpload(e, res => updateContent("music", "fileUrl", res))} />
+                             <input type="file" accept="audio/*" className="hidden" onChange={(e) => handleFileUpload(e, res => { updateContent("music", "fileUrl", res); setShowAudioMessage(true); setTimeout(() => setShowAudioMessage(false), 4000); handleSave(); })} />
                              <Music className="w-10 h-10 text-muted-foreground mb-3" />
                              <span className="text-sm font-medium">Click to select audio file</span>
-                             {content.music.fileUrl && <span className="text-xs text-primary mt-2 font-mono truncate max-w-[200px]">Audio Loaded</span>}
+                             {content.music.fileUrl && <span className="text-xs text-primary mt-2 font-mono truncate max-w-[200px]" title={getFilenameFromUrl(content.music.fileUrl)}>Currently playing: {getFilenameFromUrl(content.music.fileUrl)}</span>}
                           </label>
                        </div>
                        
@@ -1164,6 +1176,20 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
             >
                <CheckCircle className="w-5 h-5" />
                <span className="font-medium">All changes applied successfully to the website!</span>
+            </motion.div>
+         )}
+         {showAudioMessage && (
+            <motion.div
+               initial={{ opacity: 0, scale: 0.9, y: -20 }}
+               animate={{ opacity: 1, scale: 1, y: 0 }}
+               exit={{ opacity: 0, scale: 0.9, y: -20 }}
+               className="fixed top-8 right-8 bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl border border-white/20 flex items-center gap-3 z-50 backdrop-blur-md"
+            >
+               <CheckCircle className="w-5 h-5" />
+               <div>
+                 <span className="font-medium block">Audio file changed successfully!</span>
+                 <span className="text-sm opacity-90">The new background music will now play across the site.</span>
+               </div>
             </motion.div>
          )}
       </AnimatePresence>
