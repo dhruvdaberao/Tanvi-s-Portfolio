@@ -88,7 +88,14 @@ export function AdminDashboard({ onClose, onLogout }: AdminDashboardProps) {
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
     })
-    const data = await res.json()
+    let data;
+    try {
+      data = await res.json()
+    } catch (e) {
+      alert("Upload failed: The file might be too large or the network connection was interrupted.")
+      return
+    }
+    
     if (!res.ok) {
       alert(data.message || data.error || "Upload failed")
       return

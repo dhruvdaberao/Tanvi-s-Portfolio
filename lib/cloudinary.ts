@@ -6,10 +6,18 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export async function uploadToCloudinary(file: Buffer, folder: string, resourceType: "image" | "video" | "raw" | "auto" = "auto") {
-  const dataUri = `data:application/octet-stream;base64,${file.toString("base64")}`;
-  return cloudinary.uploader.upload(dataUri, {
-    folder,
-    resource_type: resourceType,
+export async function uploadToCloudinary(file: Buffer, folder: string, resourceType: "image" | "video" | "raw" | "auto" = "auto"): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: resourceType,
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    uploadStream.end(file);
   });
 }

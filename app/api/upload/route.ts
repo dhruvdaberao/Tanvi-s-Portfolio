@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { verifyAdminToken } from "@/lib/security";
 
+export const maxDuration = 60; // Allows up to 60 seconds for large 15MB file uploads to stream to Cloudinary
+
 export async function POST(request: NextRequest) {
   try {
     const token = (request.headers.get("authorization") || "").replace("Bearer ", "").trim();
