@@ -3,6 +3,8 @@ import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/db";
 import { defaultContent } from "@/lib/content";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const db = await getDb();

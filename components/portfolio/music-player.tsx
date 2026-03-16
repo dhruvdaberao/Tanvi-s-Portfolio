@@ -56,13 +56,13 @@ export function MusicPlayer() {
       }, 100)
       localStorage.setItem("music-preference", "pause")
     }
-  }, [isPlaying, content.music.enabled, content.music.loop, content.music.volume])
+  }, [isPlaying, content.music.enabled, content.music.loop, content.music.volume, content.music.fileUrl])
 
   if (!mounted || !content.music.enabled || !content.music.fileUrl) return null
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      <audio ref={audioRef} src={`/api/media/audio?url=${encodeURIComponent(content.music.fileUrl)}`} preload="auto" />
+      <audio key={content.music.fileUrl} ref={audioRef} src={`/api/media/audio?url=${encodeURIComponent(content.music.fileUrl)}`} preload="auto" />
       
       <button
         onClick={() => setIsPlaying(!isPlaying)}
